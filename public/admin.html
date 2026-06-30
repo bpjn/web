@@ -134,9 +134,9 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 <div id="login-wrap" class="login-page">
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-icon">P</div>
+      <div class="login-logo-icon" id="login-logo-icon" style="overflow:hidden;"><img id="login-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;">P</div>
       <h2>Admin Panel</h2>
-      <p>PT Nama Perusahaan</p>
+      <p id="login-company-name">PT Nama Perusahaan</p>
     </div>
     <div id="login-err" class="login-err"></div>
     <div class="fg"><label class="lbl">Username</label><input type="text" id="lu" class="fi" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()"></div>
@@ -431,6 +431,29 @@ function enterAdmin(){
   loadSettings();
 }
 if(TOKEN) enterAdmin();
+loadLoginBranding();
+
+// Tampilkan logo & nama perusahaan di halaman login (sebelum login)
+async function loadLoginBranding(){
+  try{
+    const r=await fetch('/api/get-data?table=settings');
+    const arr=await r.json();
+    if(!Array.isArray(arr))return;
+    const siteName=arr.find(x=>x.key==='site_name');
+    const siteLogo=arr.find(x=>x.key==='site_logo');
+    if(siteName&&siteName.value){
+      const p=document.getElementById('login-company-name');
+      if(p)p.textContent=siteName.value;
+    }
+    if(siteLogo&&siteLogo.value){
+      const img=document.getElementById('login-logo-img');
+      const icon=document.getElementById('login-logo-icon');
+      if(img){img.src=siteLogo.value;img.style.display='block';}
+      if(icon)icon.textContent='';
+      if(img&&icon)icon.prepend(img);
+    }
+  }catch(e){/* abaikan, biarkan default tampil */}
+}
 
 // API
 async function api(fn,body){
