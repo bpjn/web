@@ -247,7 +247,16 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
             </div>
           </div>
         </div>
-        <div class="panel"><div class="ph"><div class="pt">📰 Daftar Berita</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="news-table"></table></div></div>
+        <div class="panel">
+          <div class="ph" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="pt">📰 Daftar Berita</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="news-search" class="fi2" placeholder="🔍 Cari judul berita..." style="width:220px;" oninput="renderNews()">
+              <button class="btn-sm" onclick="exportToExcel('news')">⬇️ Export Excel</button>
+            </div>
+          </div>
+          <div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="news-table"></table></div>
+        </div>
       </div>
 
       <!-- GALERI -->
@@ -276,7 +285,16 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
             <button class="btn-sm" id="g-submit" onclick="addGallery()" style="margin-top:4px;">Upload & Tambah ke Galeri</button>
           </div>
         </div>
-        <div class="panel"><div class="ph"><div class="pt">🖼️ Foto di Galeri</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="gal-table"></table></div></div>
+        <div class="panel">
+          <div class="ph" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="pt">🖼️ Foto di Galeri</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="gal-search" class="fi2" placeholder="🔍 Cari judul foto..." style="width:220px;" oninput="renderGal()">
+              <button class="btn-sm" onclick="exportToExcel('gallery')">⬇️ Export Excel</button>
+            </div>
+          </div>
+          <div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="gal-table"></table></div>
+        </div>
       </div>
 
       <!-- LAYANAN -->
@@ -306,7 +324,16 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
             <button class="btn-sm" id="s-submit" onclick="addService()" style="margin-top:4px;">Tambah Layanan</button>
           </div>
         </div>
-        <div class="panel"><div class="ph"><div class="pt">⚙️ Daftar Layanan</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="svc-table"></table></div></div>
+        <div class="panel">
+          <div class="ph" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="pt">⚙️ Daftar Layanan</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="svc-search" class="fi2" placeholder="🔍 Cari nama layanan..." style="width:220px;" oninput="renderSvc()">
+              <button class="btn-sm" onclick="exportToExcel('services')">⬇️ Export Excel</button>
+            </div>
+          </div>
+          <div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="svc-table"></table></div>
+        </div>
       </div>
 
 
@@ -406,7 +433,13 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
       <!-- PESAN -->
       <div id="sec-pesan" style="display:none">
         <div class="panel">
-          <div class="ph"><div class="pt">💬 Pesan dari Pengunjung</div></div>
+          <div class="ph" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="pt">💬 Pesan dari Pengunjung</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="pesan-search" class="fi2" placeholder="🔍 Cari nama, email, isi pesan..." style="width:240px;" oninput="renderPesan()">
+              <button class="btn-sm" onclick="exportToExcel('pesan')">⬇️ Export Excel</button>
+            </div>
+          </div>
           <div class="pb" id="pesan-list" style="padding:16px;display:flex;flex-direction:column;gap:14px;"></div>
         </div>
       </div>
@@ -612,15 +645,17 @@ async function delNews(id){if(!confirm('Hapus berita ini?'))return;await api('de
 async function toggleNews(id,cur){await api('update-data',{table:'news',id,data:{status:cur==='published'?'draft':'published'}});renderNews();toast('Status diperbarui.');}
 async function renderNews(){
   const data=await getData('news');if(!Array.isArray(data))return;
+  const q=(document.getElementById('news-search')?.value||'').toLowerCase().trim();
+  const filtered=q?data.filter(n=>(n.title||'').toLowerCase().includes(q)||(n.cat||'').toLowerCase().includes(q)):data;
   document.getElementById('news-table').innerHTML=
     `<thead><tr><th>Foto</th><th>Judul</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`+
-    data.map(n=>`<tr>
+    (filtered.length?filtered.map(n=>`<tr>
       <td>${n.image_url?`<img src="${n.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${n.icon||'📰'}</div>`}</td>
       <td><div class="tbl-title">${n.title}</div><div class="tbl-meta">${n.body.slice(0,50)}...</div></td>
       <td>${n.cat}</td><td>${n.date}</td>
       <td><span class="pill ${n.status}" onclick="toggleNews(${n.id},'${n.status}')">${n.status==='published'?'Tayang':'Draft'}</span></td>
       <td><button class="tbl-del" onclick="delNews(${n.id})">Hapus</button></td>
-    </tr>`).join('')+'</tbody>';
+    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;">Tidak ada hasil.</td></tr>')+'</tbody>';
 }
 
 // GALLERY
@@ -640,14 +675,16 @@ async function addGallery(){
 async function delGal(id){if(!confirm('Hapus foto ini?'))return;await api('delete-data',{table:'gallery',id});renderGal();loadStats();toast('Foto dihapus.');}
 async function renderGal(){
   const data=await getData('gallery');if(!Array.isArray(data))return;
+  const q=(document.getElementById('gal-search')?.value||'').toLowerCase().trim();
+  const filtered=q?data.filter(g=>(g.title||'').toLowerCase().includes(q)||(g.descr||'').toLowerCase().includes(q)):data;
   document.getElementById('gal-table').innerHTML=
     `<thead><tr><th>Foto</th><th>Judul</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>`+
-    data.map(g=>`<tr>
+    (filtered.length?filtered.map(g=>`<tr>
       <td>${g.image_url?`<img src="${g.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${g.icon||'🖼️'}</div>`}</td>
       <td><div class="tbl-title">${g.title}</div></td>
       <td>${g.descr||'-'}</td>
       <td><button class="tbl-del" onclick="delGal(${g.id})">Hapus</button></td>
-    </tr>`).join('')+'</tbody>';
+    </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;">Tidak ada hasil.</td></tr>')+'</tbody>';
 }
 
 // SERVICES
@@ -667,15 +704,17 @@ async function addService(){
 async function delSvc(id){if(!confirm('Hapus layanan ini?'))return;await api('delete-data',{table:'services',id});renderSvc();loadStats();toast('Layanan dihapus.');}
 async function renderSvc(){
   const data=await getData('services');if(!Array.isArray(data))return;
+  const q=(document.getElementById('svc-search')?.value||'').toLowerCase().trim();
+  const filtered=q?data.filter(s=>(s.title||'').toLowerCase().includes(q)||(s.descr||'').toLowerCase().includes(q)):data;
   document.getElementById('svc-table').innerHTML=
     `<thead><tr><th>Foto</th><th>Ikon</th><th>Nama Layanan</th><th>Deskripsi</th><th>Aksi</th></tr></thead><tbody>`+
-    data.map(s=>`<tr>
+    (filtered.length?filtered.map(s=>`<tr>
       <td>${s.image_url?`<img src="${s.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${s.icon||'🔧'}</div>`}</td>
       <td style="font-size:22px;text-align:center;">${s.icon}</td>
       <td><div class="tbl-title">${s.title}</div></td>
       <td style="font-size:12px;color:var(--gray);max-width:240px;">${s.descr}</td>
       <td><button class="tbl-del" onclick="delSvc(${s.id})">Hapus</button></td>
-    </tr>`).join('')+'</tbody>';
+    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;">Tidak ada hasil.</td></tr>')+'</tbody>';
 }
 
 // TOAST
@@ -737,8 +776,12 @@ async function renderPesan(){
   const data=await getData('pesan');
   const el=document.getElementById('pesan-list');
   if(!Array.isArray(data)||data.length===0){el.innerHTML='<p style="color:rgba(255,255,255,0.4);">Belum ada pesan masuk.</p>';updatePesanBadge(data);return;}
-  // Pesan terbaru di atas
-  const sorted=[...data].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const q=(document.getElementById('pesan-search')?.value||'').toLowerCase().trim();
+  let sorted=[...data].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(q){
+    sorted=sorted.filter(p=>(p.nama||'').toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.subjek||'').toLowerCase().includes(q)||(p.isi||'').toLowerCase().includes(q));
+  }
+  if(sorted.length===0){el.innerHTML='<p style="color:rgba(255,255,255,0.4);">Tidak ada pesan yang cocok dengan pencarian.</p>';updatePesanBadge(data);return;}
   el.innerHTML=sorted.map(p=>{
     const status=p.status||'baru';
     const isBaru=status==='baru';
@@ -791,6 +834,45 @@ async function updatePesanBadge(data){
   if(belum>0){badge.textContent=belum;badge.style.display='inline-block';}
   else{badge.style.display='none';}
 }
+
+// EXPORT EXCEL (CSV format, kompatibel dibuka di Microsoft Excel / Google Sheets)
+const EXPORT_COLUMNS={
+  news:    {label:'Berita',     cols:[['title','Judul'],['cat','Kategori'],['date','Tanggal'],['status','Status'],['body','Isi']]},
+  gallery: {label:'Galeri',     cols:[['title','Judul'],['descr','Keterangan'],['image_url','URL Foto']]},
+  services:{label:'Layanan',    cols:[['title','Nama Layanan'],['descr','Deskripsi']]},
+  pesan:   {label:'Pesan',      cols:[['nama','Nama'],['email','Email'],['telp','No. WhatsApp'],['subjek','Subjek'],['isi','Isi Pesan'],['status','Status'],['created_at','Tanggal Masuk']]},
+};
+
+async function exportToExcel(table){
+  const cfg=EXPORT_COLUMNS[table];
+  if(!cfg)return;
+  const data=await getData(table);
+  if(!Array.isArray(data)||data.length===0){toast('Tidak ada data untuk diexport.','err');return;}
+
+  const headers=cfg.cols.map(c=>c[1]);
+  const rows=data.map(row=>cfg.cols.map(([key])=>{
+    let val=row[key]??'';
+    if(key==='created_at'&&val)val=new Date(val).toLocaleString('id-ID');
+    if(key==='status'&&table==='pesan')val=val==='baru'?'Baru':'Sudah Dibalas';
+    if(key==='status'&&table==='news')val=val==='published'?'Tayang':'Draft';
+    val=String(val).replace(/"/g,'""');
+    return `"${val}"`;
+  }));
+
+  const csv='\uFEFF'+[headers.map(h=>`"${h}"`).join(','),...rows.map(r=>r.join(','))].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const today=new Date().toISOString().slice(0,10);
+  a.href=url;
+  a.download=`${cfg.label}_${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`Data ${cfg.label} berhasil diexport!`);
+}
 </script>
+
 </body>
 </html>
