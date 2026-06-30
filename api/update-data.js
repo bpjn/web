@@ -1,13 +1,8 @@
-// api/update-data.js
-// POST /api/update-data — patch an existing row in a protected table.
-// Requires a valid admin token in the request body.
-// Settings rows are identified by `key`; all other tables use `id`.
+const { supabase, verifyToken, json, err } = require('../lib/supabase');
 
-import { supabase, verifyToken, json, err } from '../lib/supabase.js';
+const ALLOWED = ['news', 'gallery', 'services', 'settings', 'pesan'];
 
-const ALLOWED = ['news', 'gallery', 'services', 'settings'];
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
   const { token, table, id, key, data } = req.body ?? {};
@@ -23,4 +18,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return err(res, e.message, 500);
   }
-}
+};
