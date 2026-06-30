@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1B4332">
+<title id="page-title-meta">Website Perusahaan</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B4332;--navy2:#2D6A4F;--gold:#F4A261;--gold-light:#FFDDD2;--cream:#F8F9F4;--gray:#6B7280;--gray-light:#F3F4F6;--border:#E5E7EB;--text:#1A202C;--radius:10px;--radius-lg:16px;--shadow:0 2px 8px rgba(0,0,0,0.08);--shadow-lg:0 8px 32px rgba(27,67,50,0.12);--transition:all 0.25s ease;}
+*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--cream);overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+a,button{-webkit-tap-highlight-color:transparent;cursor:pointer;}
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(27,67,50,0.97);backdrop-filter:blur(10px);border-bottom:1px solid rgba(244,162,97,0.2);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:var(--navy);}
+.nav-logo-text{color:#fff;font-weight:700;font-size:15px;line-height:1.2;}
+.nav-logo-text span{color:var(--gold);display:block;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;}
+.nav-links{display:flex;gap:4px;align-items:center;}
+.nav-links a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border-radius:6px;transition:var(--transition);position:relative;overflow:hidden;}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,0.1);}
+.nav-links a.active{color:var(--gold);}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:50%;right:50%;height:2px;background:var(--gold);transition:left .22s ease,right .22s ease;}
+.nav-links a:hover::after,.nav-links a.active::after{left:8px;right:8px;}
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;}
+.nav-hamburger span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--navy);border-top:1px solid rgba(244,162,97,0.2);padding:12px 24px 20px;z-index:999;}
+.mobile-menu a{display:block;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.08);border-radius:8px;}
+.mobile-menu a:last-child{border:none;}
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#40916C 100%);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:64px;}
+.hero-bg{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(244,162,97,0.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);}
+.hero-inner{max-width:1200px;margin:0 auto;padding:80px 24px;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(244,162,97,0.15);border:1px solid rgba(244,162,97,0.3);color:var(--gold-light);font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:20px;}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero h1{font-family:'Lora',serif;font-size:clamp(32px,4vw,54px);font-weight:600;color:#fff;line-height:1.2;margin-bottom:20px;}
+.hero h1 em{color:var(--gold);font-style:italic;}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:15px;line-height:1.7;margin-bottom:36px;max-width:480px;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:var(--transition);position:relative;overflow:hidden;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,162,97,0.4);}
+.btn-outline-white{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.3);}
+.btn-outline-white:hover{background:rgba(255,255,255,0.08);}
+.hero-stats{display:flex;gap:32px;margin-top:44px;padding-top:36px;border-top:1px solid rgba(255,255,255,0.1);}
+.stat-item{text-align:left;}
+.stat-num{font-size:28px;font-weight:800;color:var(--gold);line-height:1;}
+.stat-label{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
+.hero-visual{display:flex;justify-content:center;align-items:center;}
+.hero-card-stack{position:relative;width:100%;max-width:380px;}
+.hero-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);padding:24px;backdrop-filter:blur(10px);}
+.hero-card-main{position:relative;z-index:2;}
+.hero-card-back{position:absolute;top:-12px;right:-12px;left:12px;bottom:12px;z-index:1;background:rgba(244,162,97,0.1);border:1px solid rgba(244,162,97,0.2);}
+.card-icon-row{display:flex;gap:12px;margin-bottom:16px;}
+.card-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.card-icon.blue{background:rgba(59,130,246,0.2);}
+.card-icon.gold{background:rgba(244,162,97,0.2);}
+.card-icon.green{background:rgba(16,185,129,0.2);}
+.card-title{color:#fff;font-weight:700;font-size:15px;margin-bottom:8px;}
+.card-bar-wrap{display:flex;flex-direction:column;gap:8px;}
+.card-bar-row{display:flex;align-items:center;gap:10px;}
+.card-bar-label{font-size:11px;color:rgba(255,255,255,0.5);width:60px;}
+.card-bar-track{flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;}
+.card-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.card-bar-val{font-size:11px;color:var(--gold);font-weight:600;width:28px;text-align:right;}
+/* SECTIONS */
+.section{padding:80px 0;}
+.section-inner{max-width:1200px;margin:0 auto;padding:0 24px;}
+.section-tag{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+.section-title{font-family:'Lora',serif;font-size:clamp(24px,3vw,38px);font-weight:600;color:var(--navy);line-height:1.25;margin-bottom:14px;}
+.section-title em{color:var(--gold);font-style:italic;}
+.section-desc{color:var(--gray);font-size:15px;line-height:1.7;max-width:560px;}
+.section-head{margin-bottom:48px;}
+.section-head.center{text-align:center;}
+.section-head.center .section-desc{margin:0 auto;}
+/* ABOUT */
+.about{background:#fff;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.about-img{position:relative;}
+.about-img-box{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:var(--radius-lg);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.about-img-box img{width:100%;height:100%;object-fit:cover;}
+.about-img-pattern{position:absolute;inset:0;opacity:0.1;background:repeating-linear-gradient(45deg,var(--gold) 0,var(--gold) 1px,transparent 0,transparent 50%) 0/12px 12px;}
+.about-img-center{text-align:center;position:relative;z-index:1;}
+.about-img-icon{font-size:64px;display:block;margin-bottom:12px;}
+.about-img-label{color:rgba(255,255,255,0.6);font-size:13px;}
+.about-badge{position:absolute;bottom:-16px;right:-16px;background:var(--gold);color:var(--navy);border-radius:var(--radius);padding:14px 18px;font-weight:700;text-align:center;box-shadow:var(--shadow-lg);}
+.about-badge .num{font-size:28px;line-height:1;display:block;}
+.about-badge .lbl{font-size:11px;opacity:0.8;}
+.about-list{display:flex;flex-direction:column;gap:14px;margin-top:28px;}
+.about-item{display:flex;gap:14px;align-items:flex-start;}
+.about-item-icon{width:36px;height:36px;background:rgba(244,162,97,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:2px;}
+.about-item-text h4{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.about-item-text p{font-size:13px;color:var(--gray);line-height:1.5;}
+/* SERVICES */
+.services{background:var(--cream);}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.service-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition);cursor:default;position:relative;}
+.service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--gold);}
+.service-card-img{height:160px;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.service-card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.service-card-img .svc-ico{position:relative;z-index:1;}
+.service-card-body{padding:20px;}
+.service-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.service-card p{font-size:13px;color:var(--gray);line-height:1.6;}
+/* NEWS */
+.news{background:#fff;}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.news-card{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition);background:#fff;}
+.news-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.news-img{background:linear-gradient(135deg,var(--navy),#40916C);height:180px;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.news-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.news-img .news-ico{position:relative;z-index:1;}
+.news-cat{position:absolute;top:12px;left:12px;background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;z-index:2;}
+.news-body{padding:20px;}
+.news-date{font-size:11px;color:var(--gray);margin-bottom:8px;}
+.news-card h3{font-size:14px;font-weight:700;color:var(--navy);line-height:1.4;margin-bottom:8px;}
+.news-card p{font-size:12px;color:var(--gray);line-height:1.5;}
+.news-card a{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:var(--gold);text-decoration:none;}
+/* GALLERY */
+.gallery{background:var(--cream);}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.gallery-item{border-radius:var(--radius);overflow:hidden;aspect-ratio:1;background:linear-gradient(135deg,var(--navy),#40916C);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;transition:var(--transition);position:relative;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.gallery-item:hover{transform:scale(1.03);box-shadow:var(--shadow-lg);}
+.gallery-item:first-child{grid-column:span 2;grid-row:span 2;font-size:56px;}
+.gallery-overlay{position:absolute;inset:0;background:rgba(27,67,50,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--transition);z-index:2;}
+.gallery-item:hover .gallery-overlay{opacity:1;}
+.gallery-overlay span{color:#fff;font-size:13px;font-weight:600;text-align:center;padding:0 12px;}
+/* CONTACT */
+.contact{background:var(--navy);position:relative;overflow:hidden;}
+.contact::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;position:relative;z-index:1;}
+.contact-info h2{font-family:'Lora',serif;font-size:30px;color:#fff;font-weight:600;margin-bottom:16px;}
+.contact-info p{color:rgba(255,255,255,0.6);font-size:15px;line-height:1.7;margin-bottom:32px;}
+.contact-items{display:flex;flex-direction:column;gap:16px;}
+.contact-item{display:flex;gap:14px;align-items:flex-start;}
+.contact-item-icon{width:38px;height:38px;background:rgba(244,162,97,0.15);border:1px solid rgba(244,162,97,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.contact-item-text{color:rgba(255,255,255,0.7);font-size:13px;line-height:1.5;}
+.contact-item-text strong{color:#fff;display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;}
+.contact-form{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);padding:32px;}
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input,.form-textarea{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:11px 14px;font-size:14px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);}
+.form-input::placeholder,.form-textarea::placeholder{color:rgba(255,255,255,0.3);}
+.form-input:focus,.form-textarea:focus{border-color:var(--gold);}
+.form-textarea{resize:vertical;min-height:100px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* FOOTER */
+.footer{background:#060F1E;padding:48px 0 24px;}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 24px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-brand p{color:rgba(255,255,255,0.4);font-size:13px;line-height:1.6;max-width:260px;margin-top:12px;}
+.footer-col h4{color:#fff;font-size:13px;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.footer-col a{display:block;color:rgba(255,255,255,0.45);font-size:13px;text-decoration:none;margin-bottom:8px;transition:var(--transition);}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;}
+.footer-copy{color:rgba(255,255,255,0.35);font-size:12px;}
+.footer-socials{display:flex;gap:10px;}
+.footer-social{width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:6px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:14px;text-decoration:none;transition:var(--transition);}
+.footer-social:hover{background:var(--gold);color:var(--navy);}
+/* UTILS */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;display:none;align-items:center;gap:10px;border-left:3px solid var(--gold);}
+.toast.show{display:flex;animation:slideIn .3s ease;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.hero-content>*{animation:fadeUp .6s ease both;}
+.hero-content>*:nth-child(1){animation-delay:.1s}.hero-content>*:nth-child(2){animation-delay:.2s}.hero-content>*:nth-child(3){animation-delay:.3s}.hero-content>*:nth-child(4){animation-delay:.4s}.hero-content>*:nth-child(5){animation-delay:.5s}
+.ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ra .6s ease-out forwards;background:rgba(255,255,255,0.4);pointer-events:none;z-index:9999;}
+@keyframes ra{0%{transform:scale(0);opacity:.6}100%{transform:scale(5);opacity:0;}}
+@media(max-width:1024px){.services-grid,.news-grid{grid-template-columns:repeat(2,1fr);}.gallery-grid{grid-template-columns:repeat(3,1fr);}.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.hero-inner{grid-template-columns:1fr;padding:60px 20px;}.hero-visual{display:none;}.about-grid,.contact-grid{grid-template-columns:1fr;gap:32px;}.services-grid,.news-grid{grid-template-columns:1fr;}.gallery-grid{grid-template-columns:repeat(2,1fr);}.nav-links{display:none;}.nav-hamburger{display:block;}.footer-grid{grid-template-columns:1fr 1fr;gap:24px;}.section{padding:56px 0;}.section-inner{padding:0 16px;}.hero-btns{flex-direction:column;gap:10px;}.hero-btns .btn{justify-content:center;width:100%;}.contact-form{padding:20px;}}
+@media(max-width:480px){.hero h1{font-size:26px!important;}.hero-stats{flex-wrap:wrap;gap:16px;}.stat-num{font-size:22px;}.section{padding:48px 0;}.section-inner{padding:0 14px;}.gallery-grid{grid-template-columns:repeat(2,1fr);}.gallery-item:first-child{grid-column:span 2;grid-row:span 1;}.footer-grid{grid-template-columns:1fr;gap:20px;}.nav-inner{padding:0 14px;}.form-row{grid-template-columns:1fr;}.footer-bottom{flex-direction:column;gap:12px;text-align:center;}.hero-inner{padding:50px 14px 60px;}}
+  /* Hide content until data loaded */
+  .content-wrap{opacity:0;transition:opacity 0.4s ease;}
+  .content-wrap.loaded{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="content-wrap" id="content-wrap">
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#beranda" class="nav-logo">
+      <div class="nav-logo-icon" id="nav-logo-icon"><img id="nav-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
+      <div class="nav-logo-text" id="nav-logo-text"><span id="nav-tagline"></span></div>
+    </a>
+    <div class="nav-links">
+      <a href="#beranda" class="active">Beranda</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#layanan">Layanan</a>
+      <a href="#berita">Berita</a>
+      <a href="#galeri">Galeri</a>
+      <a href="#kontak">Kontak</a>
+    </div>
+    <button class="nav-hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#beranda" onclick="closeMobile()">Beranda</a>
+  <a href="#tentang" onclick="closeMobile()">Tentang</a>
+  <a href="#layanan" onclick="closeMobile()">Layanan</a>
+  <a href="#berita" onclick="closeMobile()">Berita</a>
+  <a href="#galeri" onclick="closeMobile()">Galeri</a>
+  <a href="#kontak" onclick="closeMobile()">Kontak</a>
+</div>
+
+<section class="hero" id="beranda">
+  <div class="hero-bg"></div><div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-tag" id="hero-tag">🏢 Perusahaan Terpercaya</div>
+      <h1 id="hero-title">Solusi <em>Terbaik</em> untuk Bisnis Anda</h1>
+      <p class="hero-desc" id="hero-desc">Kami hadir dengan layanan profesional dan berpengalaman untuk mendukung pertumbuhan bisnis Anda.</p>
+      <div class="hero-btns">
+        <a href="#layanan" class="btn btn-gold">Lihat Layanan Kami</a>
+        <a href="#kontak" class="btn btn-outline-white">Hubungi Kami</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num" id="stat-klien">–</div><div class="stat-label">Klien Puas</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-proyek">–</div><div class="stat-label">Proyek Selesai</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-tahun">–</div><div class="stat-label">Tahun Berpengalaman</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="hero-card hero-card-back"></div>
+        <div class="hero-card hero-card-main">
+          <div class="card-icon-row"><div class="card-icon blue">📊</div><div class="card-icon gold">⭐</div><div class="card-icon green">✅</div></div>
+          <div class="card-title">Performa Bisnis 2024</div>
+          <div class="card-bar-wrap">
+            <div class="card-bar-row"><span class="card-bar-label">Proyek</span><div class="card-bar-track"><div class="card-bar-fill" style="width:90%"></div></div><span class="card-bar-val">90%</span></div>
+            <div class="card-bar-row"><span class="card-bar-label">Kualitas</span><div class="card-bar-track"><div class="card-bar-fill" style="width:96%"></div></div><span class="card-bar-val">96%</span></div>
+            <div class="card-bar-row"><span class="card-bar-label">Tepat waktu</span><div class="card-bar-track"><div class="card-bar-fill" style="width:88%"></div></div><span class="card-bar-val">88%</span></div>
+            <div class="card-bar-row"><span class="card-bar-label">Kepuasan</span><div class="card-bar-track"><div class="card-bar-fill" style="width:98%"></div></div><span class="card-bar-val">98%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section about" id="tentang">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-img">
+        <div class="about-img-box">
+          <div class="about-img-pattern"></div>
+          <div class="about-img-center"><span class="about-img-icon">🏢</span><div class="about-img-label" id="about-co-name">PT Nama Perusahaan</div></div>
+        </div>
+        <div class="about-badge"><span class="num" id="about-tahun">14+</span><span class="lbl">Tahun Berpengalaman</span></div>
+      </div>
+      <div class="about-text">
+        <div class="section-head">
+          <div class="section-tag">Tentang Kami</div>
+          <h2 class="section-title" id="about-title">Komitmen Kami untuk <em>Kualitas Terbaik</em></h2>
+          <p class="section-desc" id="about-desc">Sejak berdiri, kami terus berkomitmen memberikan layanan terbaik.</p>
+        </div>
+        <div class="about-list">
+          <div class="about-item"><div class="about-item-icon">🎯</div><div class="about-item-text"><h4>Visi Kami</h4><p id="about-visi">–</p></div></div>
+          <div class="about-item"><div class="about-item-icon">🤝</div><div class="about-item-text"><h4>Misi Kami</h4><p id="about-misi">–</p></div></div>
+          <div class="about-item"><div class="about-item-icon">⭐</div><div class="about-item-text"><h4>Nilai Perusahaan</h4><p id="about-nilai">–</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section services" id="layanan">
+  <div class="section-inner">
+    <div class="section-head center">
+      <div class="section-tag">Layanan Kami</div>
+      <h2 class="section-title">Apa yang Kami <em>Tawarkan</em></h2>
+      <p class="section-desc">Berbagai layanan profesional kami dirancang untuk memenuhi kebutuhan bisnis Anda secara menyeluruh.</p>
+    </div>
+    <div class="services-grid" id="services-list">
+      <div class="service-card skeleton" style="height:220px;"></div>
+      <div class="service-card skeleton" style="height:220px;"></div>
+      <div class="service-card skeleton" style="height:220px;"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section news" id="berita">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-tag">Berita & Pengumuman</div>
+      <h2 class="section-title">Info Terkini dari <em>Kami</em></h2>
+      <p class="section-desc">Ikuti perkembangan terbaru perusahaan, pencapaian, dan informasi penting lainnya.</p>
+    </div>
+    <div class="news-grid" id="news-list">
+      <div class="news-card skeleton" style="height:280px;"></div>
+      <div class="news-card skeleton" style="height:280px;"></div>
+      <div class="news-card skeleton" style="height:280px;"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery" id="galeri">
+  <div class="section-inner">
+    <div class="section-head center">
+      <div class="section-tag">Galeri</div>
+      <h2 class="section-title">Dokumentasi <em>Kegiatan</em></h2>
+      <p class="section-desc">Momen-momen berharga dari berbagai kegiatan dan pencapaian perusahaan kami.</p>
+    </div>
+    <div class="gallery-grid" id="gallery-list"></div>
+  </div>
+</section>
+
+<section class="section contact" id="kontak">
+  <div class="section-inner">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="section-tag" style="color:var(--gold-light)">Hubungi Kami</div>
+        <h2>Siap Membantu<br>Kebutuhan Anda</h2>
+        <p>Jangan ragu untuk menghubungi kami. Tim kami siap memberikan solusi terbaik untuk bisnis Anda.</p>
+        <div class="contact-items">
+          <div class="contact-item"><div class="contact-item-icon">📍</div><div class="contact-item-text"><strong>Alamat</strong><span id="k-alamat">–</span></div></div>
+          <div class="contact-item"><div class="contact-item-icon">📞</div><div class="contact-item-text"><strong>Telepon</strong><span id="k-telp">–</span></div></div>
+          <div class="contact-item"><div class="contact-item-icon">✉️</div><div class="contact-item-text"><strong>Email</strong><span id="k-email">–</span></div></div>
+          <div class="contact-item"><div class="contact-item-icon">🕐</div><div class="contact-item-text"><strong>Jam Kerja</strong><span id="k-jam">–</span></div></div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3 style="color:#fff;font-size:16px;font-weight:700;margin-bottom:20px;">Kirim Pesan</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nama</label><input type="text" id="pesan-nama" class="form-input" placeholder="Nama lengkap"></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" id="pesan-email" class="form-input" placeholder="email@anda.com"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Subjek</label><input type="text" id="pesan-subjek" class="form-input" placeholder="Perihal pesan"></div>
+        <div class="form-group"><label class="form-label">Pesan</label><textarea id="pesan-isi" class="form-textarea" placeholder="Tulis pesan Anda di sini..."></textarea></div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="kirimPesan()">Kirim Pesan</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="display:inline-flex;">
+          <div class="nav-logo-icon" id="footer-logo-icon"><img id="footer-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
+          <div class="nav-logo-text" id="footer-logo-text"><span id="footer-tagline"></span></div>
+        </div>
+        <p id="footer-desc">Perusahaan profesional yang berdedikasi memberikan layanan terbaik dan solusi inovatif untuk bisnis Anda.</p>
+      </div>
+      <div class="footer-col"><h4>Navigasi</h4><a href="#beranda">Beranda</a><a href="#tentang">Tentang Kami</a><a href="#layanan">Layanan</a><a href="#berita">Berita</a><a href="#galeri">Galeri</a></div>
+      <div class="footer-col" id="footer-layanan-col"><h4>Layanan</h4></div>
+      <div class="footer-col"><h4>Kontak</h4><a id="f-telp" href="#">–</a><a id="f-email" href="#">–</a><a id="f-alamat" href="#">–</a></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy" id="footer-copy"></div>
+      <div class="footer-socials">
+        <a id="s-fb" href="#" class="footer-social">f</a>
+        <a id="s-ig" href="#" class="footer-social">ig</a>
+        <a id="s-li" href="#" class="footer-social">in</a>
+        <a id="s-yt" href="#" class="footer-social">yt</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast">✅ <span id="toast-msg"></span></div>
+
+</div>
+<script>
+async function fetchData(table){
+  try{const r=await fetch(`/api/get-data?table=${table}`);return await r.json();}
+  catch(e){return[];}
+}
+
+// Convert settings array [{key,value}] to object {key:value}
+function settingsToObj(arr){
+  const obj={};
+  if(Array.isArray(arr)) arr.forEach(s=>{obj[s.key]=s.value;});
+  return obj;
+}
+
+function s(id){return document.getElementById(id);}
+function setText(id,val){const el=s(id);if(el&&val)el.textContent=val;}
+function setHtml(id,val){const el=s(id);if(el&&val)el.innerHTML=val;}
+
+async function renderPublic(){
+  // Catat kunjungan
+  fetch('/api/track-visitor', { method: 'POST' }).catch(()=>{});
+  const [news, gallery, services, settingsArr] = await Promise.all([
+    fetchData('news'), fetchData('gallery'), fetchData('services'), fetchData('settings')
+  ]);
+
+  const cfg = settingsToObj(settingsArr);
+
+  // ── SETTINGS → Apply ke semua elemen ──
+  const siteName = cfg.site_name || 'PT Nama Perusahaan';
+  const tagline  = cfg.site_tagline || 'Est. 2010';
+
+  document.title = siteName;
+  setText('page-title-meta', siteName);
+
+  // Navbar
+  setText('nav-logo-text', siteName);
+  setText('nav-tagline', tagline);
+  const logoUrl = cfg.site_logo || '';
+  const logoChar = siteName.charAt(0).toUpperCase();
+  if(logoUrl){
+    const ni=document.getElementById('nav-logo-img');
+    const fi=document.getElementById('footer-logo-img');
+    if(ni){ni.src=logoUrl;ni.style.display='block';}
+    if(fi){fi.src=logoUrl;fi.style.display='block';}
+  } else {
+    const ni=document.getElementById('nav-logo-img');
+    const fi=document.getElementById('footer-logo-img');
+    if(ni)ni.style.display='none';
+    if(fi)fi.style.display='none';
+    setText('nav-logo-icon', logoChar);
+    setText('footer-logo-icon', logoChar);
+  }
+
+  // Hero
+  setHtml('hero-tag', cfg.hero_tag || '🏢 Perusahaan Terpercaya');
+  setHtml('hero-title', cfg.hero_title || 'Solusi <em>Terbaik</em> untuk Bisnis Anda');
+  setText('hero-desc', cfg.hero_desc || '');
+  setText('stat-klien', cfg.stat_klien || '500+');
+  setText('stat-proyek', cfg.stat_proyek || '350+');
+  setText('stat-tahun', cfg.stat_tahun || '14');
+
+  // About
+  setText('about-co-name', siteName);
+  setText('about-tahun', cfg.about_tahun || '14+');
+  setHtml('about-title', cfg.about_title || 'Komitmen Kami untuk <em>Kualitas Terbaik</em>');
+  setText('about-desc', cfg.about_desc || '');
+  setText('about-visi', cfg.visi || '');
+  setText('about-misi', cfg.misi || '');
+  setText('about-nilai', cfg.nilai || '');
+
+  // Kontak
+  setText('k-alamat', cfg.kontak_alamat || '');
+  setText('k-telp', cfg.kontak_telp || '');
+  setText('k-email', cfg.kontak_email || '');
+  setText('k-jam', cfg.kontak_jam || '');
+
+  // Footer
+  setText('footer-logo-text', siteName);
+  setText('footer-tagline', tagline);
+  setText('footer-desc', cfg.footer_desc || '');
+  setText('footer-copy', cfg.footer_copy || '');
+  if(s('f-telp')){s('f-telp').textContent=cfg.kontak_telp||'';s('f-telp').href='tel:'+cfg.kontak_telp;}
+  if(s('f-email')){s('f-email').textContent=cfg.kontak_email||'';s('f-email').href='mailto:'+cfg.kontak_email;}
+  setText('f-alamat', cfg.kontak_alamat || '');
+  if(cfg.sosmed_facebook && s('s-fb')) s('s-fb').href=cfg.sosmed_facebook;
+  if(cfg.sosmed_instagram && s('s-ig')) s('s-ig').href=cfg.sosmed_instagram;
+  if(cfg.sosmed_linkedin && s('s-li')) s('s-li').href=cfg.sosmed_linkedin;
+  if(cfg.sosmed_youtube && s('s-yt')) s('s-yt').href=cfg.sosmed_youtube;
+
+  // ── SERVICES ──
+  s('services-list').innerHTML = Array.isArray(services) && services.length ? services.map(sv=>`
+    <div class="service-card reveal">
+      <div class="service-card-img">
+        ${sv.image_url?`<img src="${sv.image_url}" alt="${sv.title}">`:''}
+        <span class="svc-ico">${sv.image_url?'':sv.icon}</span>
+      </div>
+      <div class="service-card-body">
+        <h3>${sv.title}</h3>
+        <p>${sv.descr}</p>
+      </div>
+    </div>`).join('') : '<p style="color:var(--gray);text-align:center;padding:40px;">Belum ada layanan.</p>';
+
+  // Footer layanan kolom
+  if(Array.isArray(services)){
+    s('footer-layanan-col').innerHTML='<h4>Layanan</h4>'+services.slice(0,4).map(sv=>`<a href="#layanan">${sv.title}</a>`).join('');
+  }
+
+  // ── NEWS ──
+  const pub = Array.isArray(news) ? news.filter(n=>n.status==='published').slice(0,3) : [];
+  s('news-list').innerHTML = pub.length ? pub.map(n=>`
+    <div class="news-card reveal">
+      <div class="news-img">
+        ${n.image_url?`<img src="${n.image_url}" alt="${n.title}">`:`<span class="news-ico">${n.icon||'📰'}</span>`}
+        <span class="news-cat">${n.cat}</span>
+      </div>
+      <div class="news-body">
+        <div class="news-date">📅 ${n.date}</div>
+        <h3>${n.title}</h3>
+        <p>${n.body.slice(0,100)}...</p>
+        <a href="#">Baca selengkapnya →</a>
+      </div>
+    </div>`).join('') : '<p style="color:var(--gray);text-align:center;padding:40px;">Belum ada berita.</p>';
+
+  // ── GALLERY ──
+  s('gallery-list').innerHTML = Array.isArray(gallery) && gallery.length ? gallery.map(g=>`
+    <div class="gallery-item reveal">
+      ${g.image_url?`<img src="${g.image_url}" alt="${g.title}">`:`<span>${g.icon||'🖼️'}</span>`}
+      <div class="gallery-overlay"><span>${g.title}</span></div>
+    </div>`).join('') : '';
+
+  // Reveal
+  setTimeout(()=>{document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));},100);
+}
+
+// Scroll reveal
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});
+},{threshold:0.1});
+
+function showToast(msg){
+  const t=s('toast');s('toast-msg').textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+function toggleMobile(){const m=s('mobile-menu');m.style.display=m.style.display==='block'?'none':'block';}
+function closeMobile(){s('mobile-menu').style.display='none';}
+
+window.addEventListener('scroll',()=>{
+  const secs=['beranda','tentang','layanan','berita','galeri','kontak'];
+  let cur='beranda';
+  secs.forEach(sec=>{const el=s(sec);if(el&&window.scrollY>=el.offsetTop-80)cur=sec;});
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+});
+
+// Ripple
+document.addEventListener('click',e=>{
+  const el=e.target.closest('.btn,.nav-links a,.gallery-item,.service-card,.footer-social');if(!el)return;
+  if(getComputedStyle(el).position==='static')el.style.position='relative';
+  el.style.overflow='hidden';
+  const r=document.createElement('span');r.className='ripple';
+  const rect=el.getBoundingClientRect(),size=Math.max(rect.width,rect.height)*2.5;
+  r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  el.appendChild(r);r.addEventListener('animationend',()=>r.remove());
+});
+
+renderPublic().then(()=>{
+  const w=document.getElementById('content-wrap');
+  if(w)w.classList.add('loaded');
+});
+
+async function kirimPesan(){
+  const nama=document.getElementById('pesan-nama').value.trim();
+  const email=document.getElementById('pesan-email').value.trim();
+  const subjek=document.getElementById('pesan-subjek').value.trim();
+  const isi=document.getElementById('pesan-isi').value.trim();
+  if(!nama||!email||!isi){showToast('Mohon isi nama, email, dan pesan!');return;}
+  try{
+    const res=await fetch('/api/send-pesan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama,email,subjek,isi})});
+    if(res.ok){
+      showToast('Pesan berhasil dikirim! Tim kami akan menghubungi Anda segera.');
+      document.getElementById('pesan-nama').value='';
+      document.getElementById('pesan-email').value='';
+      document.getElementById('pesan-subjek').value='';
+      document.getElementById('pesan-isi').value='';
+    } else { showToast('Gagal mengirim pesan, coba lagi.'); }
+  }catch(e){showToast('Gagal mengirim pesan, coba lagi.');}
+}
+</script>
+</body>
+</html>
