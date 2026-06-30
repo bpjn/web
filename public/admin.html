@@ -1,20 +1,796 @@
-const { supabase, verifyToken, json, err } = require('../lib/supabase');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B4332">
+<title>Admin Panel — PT Nama Perusahaan</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B4332;--navy2:#2D6A4F;--gold:#F4A261;--gold-light:#FFDDD2;--cream:#F8F9F4;--gray:#6B7280;--gray-light:#F3F4F6;--border:#E5E7EB;--text:#1A202C;--radius:10px;--radius-lg:16px;--shadow-lg:0 8px 32px rgba(27,67,50,0.12);--transition:all 0.25s ease;--sw:210px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--cream);-webkit-font-smoothing:antialiased;}
+a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
-const ALLOWED = ['news', 'gallery', 'services', 'pesan'];
+/* LOGIN */
+.login-page{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);padding:40px;width:100%;max-width:400px;backdrop-filter:blur(20px);}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:var(--navy);margin:0 auto 12px;}
+.login-logo h2{color:#fff;font-size:18px;font-weight:700;}
+.login-logo p{color:rgba(255,255,255,0.5);font-size:13px;margin-top:3px;}
+.lbl{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.lbl2{display:block;font-size:11px;font-weight:600;color:var(--gray);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px;}
+.fg{margin-bottom:16px;}
+.fi{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:11px 14px;font-size:14px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);}
+.fi::placeholder{color:rgba(255,255,255,0.3);}
+.fi:focus{border-color:var(--gold);background:rgba(255,255,255,0.08);}
+.fi2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);}
+.fi2:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(244,162,97,0.1);}
+.ft2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);resize:vertical;min-height:110px;}
+.ft2:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(244,162,97,0.1);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.login-err{background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);color:#FCA5A5;border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
+.back-link{display:block;text-align:center;margin-top:14px;color:rgba(255,255,255,0.4);font-size:13px;text-decoration:none;}
+.back-link:hover{color:rgba(255,255,255,0.7);}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:var(--transition);position:relative;overflow:hidden;}
+.btn-gold{background:var(--gold);color:var(--navy);width:100%;justify-content:center;margin-top:8px;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-sm{background:var(--gold);color:var(--navy);padding:8px 16px;font-size:13px;border-radius:var(--radius);font-weight:600;cursor:pointer;border:none;transition:var(--transition);}
+.btn-sm:hover{background:var(--gold-light);}
+.btn-cancel{background:var(--gray-light);color:var(--gray);padding:8px 16px;font-size:13px;border-radius:var(--radius);font-weight:600;cursor:pointer;border:1px solid var(--border);transition:var(--transition);}
+.btn-cancel:hover{background:#FEF2F2;color:#DC2626;border-color:#FECACA;}
+.disabled{opacity:0.6;pointer-events:none;}
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
+/* LAYOUT */
+.admin-wrap{display:none;}
+.admin-wrap.active{display:flex;min-height:100vh;}
+.sidebar{background:var(--navy);position:fixed;top:0;bottom:0;width:var(--sw);display:flex;flex-direction:column;z-index:200;overflow-y:auto;}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+.sb-logo h3{color:#fff;font-size:13px;font-weight:700;}
+.sb-logo p{color:rgba(255,255,255,0.4);font-size:11px;margin-top:2px;}
+.sb-nav{flex:1;padding:8px 0;}
+.sb-sec{padding:14px 14px 5px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 14px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;cursor:pointer;transition:var(--transition);border-left:3px solid transparent;}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.05);}
+.sb-link.active{color:#fff;background:rgba(244,162,97,0.12);border-left-color:var(--gold);}
+.sb-link svg{width:15px;height:15px;flex-shrink:0;}
+.sb-foot{padding:14px;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+.sb-user{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.sb-avatar{width:30px;height:30px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy);flex-shrink:0;}
+.sb-uname{color:#fff;font-size:12px;font-weight:600;}
+.sb-urole{color:rgba(255,255,255,0.4);font-size:11px;}
+.sb-logout{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:var(--radius);padding:8px;font-size:12px;cursor:pointer;transition:var(--transition);font-family:inherit;}
+.sb-logout:hover{background:rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.3);color:#FCA5A5;}
+.main{margin-left:var(--sw);min-height:100vh;background:#F8F9FA;flex:1;min-width:0;width:calc(100% - var(--sw));overflow-x:hidden;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;}
+.topbar h1{font-size:15px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.content{padding:20px;}
 
-  const { token, table, id } = req.body ?? {};
+/* CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:transform .2s ease,box-shadow .2s ease;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.si-navy{background:rgba(27,67,50,0.08);}
+.si-gold{background:rgba(244,162,97,0.1);}
+.si-green{background:rgba(16,185,129,0.1);}
+.si-blue{background:rgba(59,130,246,0.1);}
+.stat-num{font-size:22px;font-weight:800;color:var(--navy);line-height:1;}
+.stat-lbl{font-size:11px;color:var(--gray);margin-top:3px;}
+.panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px;}
+.ph{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pt{font-size:14px;font-weight:700;color:var(--navy);}
+.pb{padding:20px;}
 
-  if (!verifyToken(token)) return err(res, 'Tidak terautentikasi.', 401);
-  if (!table || !ALLOWED.includes(table)) return err(res, 'Table tidak valid.');
-  if (!id) return err(res, 'ID diperlukan.');
+/* UPLOAD */
+.upload-box{border:2px dashed var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);background:var(--gray-light);position:relative;overflow:hidden;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.upload-box:hover{border-color:var(--gold);background:rgba(244,162,97,0.04);}
+.upload-box.has-img{border-style:solid;border-color:var(--gold);}
+.upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-empty{text-align:center;pointer-events:none;}
+.upload-empty .ico{font-size:28px;margin-bottom:6px;}
+.upload-empty .ttl{font-size:13px;font-weight:600;color:var(--navy);}
+.upload-empty .hint{font-size:11px;color:var(--gray);margin-top:3px;}
+.upload-preview-img{width:100%;max-height:200px;object-fit:cover;display:none;border-radius:calc(var(--radius) - 2px);}
+.upload-change{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;pointer-events:none;display:none;}
+.upload-bar-wrap{margin-top:8px;display:none;}
+.upload-bar{height:4px;background:var(--gray-light);border-radius:2px;overflow:hidden;}
+.upload-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:2px;width:0%;transition:width .3s ease;}
+.upload-bar-txt{font-size:11px;color:var(--gray);margin-top:4px;text-align:center;}
 
-  try {
-    await supabase('DELETE', table, `?id=eq.${id}`);
-    return json(res, { ok: true });
-  } catch (e) {
-    return err(res, e.message, 500);
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;background:var(--gray-light);border-bottom:1px solid var(--border);}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#FAFAFA;}
+.tbl-title{font-weight:600;color:var(--navy);font-size:13px;}
+.tbl-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+.tbl-thumb{width:56px;height:44px;object-fit:cover;border-radius:6px;}
+.tbl-thumb-ph{width:56px;height:44px;border-radius:6px;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;font-size:20px;}
+.tbl-del{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:#FEF2F2;color:#DC2626;transition:var(--transition);}
+.tbl-del:hover{background:#FEE2E2;}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;}
+.pill.published{background:#DCFCE7;color:#166534;}
+.pill.draft{background:#F1F5F9;color:#64748B;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;display:none;align-items:center;gap:10px;border-left:3px solid var(--gold);max-width:320px;}
+.toast.show{display:flex;animation:slideIn .3s ease;}
+.toast.err{border-left-color:#DC2626;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ra .6s ease-out forwards;background:rgba(255,255,255,0.4);pointer-events:none;z-index:9999;}
+@keyframes ra{0%{transform:scale(0);opacity:.6}100%{transform:scale(5);opacity:0;}}
+
+@media(max-width:960px){:root{--sw:180px;}.stats{grid-template-columns:repeat(2,1fr);}.frow{grid-template-columns:1fr;}}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;width:100%;}.stats{grid-template-columns:repeat(2,1fr);}.frow{grid-template-columns:1fr;}.topbar{padding:0 14px;}.content{padding:14px;}}
+@media(max-width:480px){.content{padding:12px;}.pb{padding:14px;}.ph{padding:12px 14px;}.stats{gap:10px;}.stat-card{padding:12px;}.stat-num{font-size:18px;}.login-card{padding:24px 16px;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-wrap" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon" id="login-logo-icon" style="overflow:hidden;"><img id="login-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;">P</div>
+      <h2>Admin Panel</h2>
+      <p id="login-company-name">PT Nama Perusahaan</p>
+    </div>
+    <div id="login-err" class="login-err"></div>
+    <div class="fg"><label class="lbl">Username</label><input type="text" id="lu" class="fi" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="fg"><label class="lbl">Password</label><input type="password" id="lp" class="fi" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-gold" id="login-btn" onclick="doLogin()">Masuk ke Admin</button>
+    <a href="/" class="back-link">← Kembali ke Website</a>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-wrap" class="admin-wrap">
+  <aside class="sidebar">
+    <div class="sb-logo"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;"><div id="sb-logo-wrap" style="width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--navy);flex-shrink:0;overflow:hidden;"><img id="sb-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;"></div><h3 style="margin:0;">Admin Panel</h3></div><p id="sb-company-name">PT Nama Perusahaan</p></div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Menu Utama</div>
+      <div class="sb-link active" onclick="showSec('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </div>
+      <div class="sb-sec">Konten</div>
+      <div class="sb-link" onclick="showSec('berita',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Berita & Artikel
+      </div>
+      <div class="sb-link" onclick="showSec('galeri',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeri
+      </div>
+      <div class="sb-link" onclick="showSec('layanan',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Layanan
+      </div>
+      <div class="sb-link" onclick="showSec('pengaturan',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan
+      </div>
+      <div class="sb-link" onclick="showSec('pesan',this)" style="position:relative;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Pesan Masuk
+        <span id="pesan-badge" style="display:none;margin-left:auto;background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;">0</span>
+      </div>
+      <div class="sb-sec">Lainnya</div>
+      <div class="sb-link" onclick="window.open('/','_blank')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Lihat Website
+      </div>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-avatar">A</div>
+        <div><div class="sb-uname">Administrator</div><div class="sb-urole">Super Admin</div></div>
+      </div>
+      <button class="sb-logout" onclick="doLogout()">🚪 Keluar</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <div style="font-size:12px;color:var(--gray);white-space:nowrap;" id="admin-date"></div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div id="sec-dashboard">
+        <div class="stats">
+          <div class="stat-card"><div class="stat-icon si-navy">📰</div><div><div class="stat-num" id="d-berita">–</div><div class="stat-lbl">Total Berita</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-gold">🖼️</div><div><div class="stat-num" id="d-galeri">–</div><div class="stat-lbl">Foto Galeri</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-num" id="d-layanan">–</div><div class="stat-lbl">Layanan Aktif</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">👁️</div><div><div class="stat-num" id="d-pengunjung">0</div><div class="stat-lbl">Pengunjung</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">📋 Panduan Admin</div></div>
+          <div class="pb" style="font-size:13px;color:var(--gray);line-height:1.9;">
+            Selamat datang di panel admin.<br><br>
+            📰 <strong>Berita & Artikel</strong> — Tambah berita lengkap dengan foto sampul.<br>
+            🖼️ <strong>Galeri</strong> — Upload foto kegiatan langsung dari PC/HP.<br>
+            ⚙️ <strong>Layanan</strong> — Kelola daftar layanan perusahaan dengan foto.<br>
+            🌐 <strong>Lihat Website</strong> — Buka halaman publik di tab baru.
+          </div>
+        </div>
+      </div>
+
+      <!-- BERITA -->
+      <div id="sec-berita" style="display:none">
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">➕ Tambah Berita / Pengumuman</div></div>
+          <div class="pb">
+            <div class="frow" style="margin-bottom:16px;">
+              <div class="fg"><label class="lbl2">Judul Berita</label><input type="text" id="n-title" class="fi2" placeholder="Judul berita..."></div>
+              <div class="fg"><label class="lbl2">Kategori</label><select id="n-cat" class="fi2"><option>Berita</option><option>Pengumuman</option><option>Kegiatan</option><option>Prestasi</option></select></div>
+            </div>
+            <div class="fg" style="margin-bottom:16px;"><label class="lbl2">Isi Berita</label><textarea id="n-body" class="ft2" placeholder="Tulis isi berita..."></textarea></div>
+            <div class="fg" style="margin-bottom:16px;">
+              <label class="lbl2">Foto Sampul (opsional)</label>
+              <div class="upload-box" id="n-upload-box">
+                <input type="file" id="n-file" accept="image/*" onchange="previewUpload(this,'n-preview','n-upload-box','n-change-lbl')">
+                <div class="upload-empty" id="n-upload-empty">
+                  <div class="ico">🖼️</div>
+                  <div class="ttl">Klik atau drag foto ke sini</div>
+                  <div class="hint">JPG, PNG, WEBP — Maks. 5MB</div>
+                </div>
+                <img id="n-preview" class="upload-preview-img" alt="preview">
+                <div class="upload-change" id="n-change-lbl">Ganti Foto</div>
+              </div>
+            </div>
+            <div class="frow" style="margin-bottom:16px;">
+              <div class="fg"><label class="lbl2">Emoji</label><input type="text" id="n-icon" class="fi2" value="📰"></div>
+              <div class="fg"><label class="lbl2">Status</label><select id="n-status" class="fi2"><option value="published">Publish</option><option value="draft">Draft</option></select></div>
+            </div>
+            <div class="upload-bar-wrap" id="n-bar-wrap"><div class="upload-bar"><div class="upload-bar-fill" id="n-bar-fill"></div></div><div class="upload-bar-txt" id="n-bar-txt"></div></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+              <button class="btn-sm" id="n-submit" onclick="addNews()">Simpan & Publish</button>
+              <button class="btn-cancel" onclick="resetSection('n')">Batal</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><div class="ph"><div class="pt">📰 Daftar Berita</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="news-table"></table></div></div>
+      </div>
+
+      <!-- GALERI -->
+      <div id="sec-galeri" style="display:none">
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">➕ Upload Foto Galeri</div></div>
+          <div class="pb">
+            <div class="frow" style="margin-bottom:16px;">
+              <div class="fg"><label class="lbl2">Judul Foto</label><input type="text" id="g-title" class="fi2" placeholder="Nama kegiatan..."></div>
+              <div class="fg"><label class="lbl2">Keterangan</label><input type="text" id="g-desc" class="fi2" placeholder="Keterangan singkat"></div>
+            </div>
+            <div class="fg" style="margin-bottom:16px;">
+              <label class="lbl2">Upload Foto</label>
+              <div class="upload-box" id="g-upload-box">
+                <input type="file" id="g-file" accept="image/*" onchange="previewUpload(this,'g-preview','g-upload-box','g-change-lbl')">
+                <div class="upload-empty" id="g-upload-empty">
+                  <div class="ico">📷</div>
+                  <div class="ttl">Klik atau drag foto ke sini</div>
+                  <div class="hint">JPG, PNG, WEBP — Maks. 5MB</div>
+                </div>
+                <img id="g-preview" class="upload-preview-img" alt="preview">
+                <div class="upload-change" id="g-change-lbl">Ganti Foto</div>
+              </div>
+            </div>
+            <div class="upload-bar-wrap" id="g-bar-wrap"><div class="upload-bar"><div class="upload-bar-fill" id="g-bar-fill"></div></div><div class="upload-bar-txt" id="g-bar-txt"></div></div>
+            <button class="btn-sm" id="g-submit" onclick="addGallery()" style="margin-top:4px;">Upload & Tambah ke Galeri</button>
+          </div>
+        </div>
+        <div class="panel"><div class="ph"><div class="pt">🖼️ Foto di Galeri</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="gal-table"></table></div></div>
+      </div>
+
+      <!-- LAYANAN -->
+      <div id="sec-layanan" style="display:none">
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">➕ Tambah Layanan</div></div>
+          <div class="pb">
+            <div class="frow" style="margin-bottom:16px;">
+              <div class="fg"><label class="lbl2">Nama Layanan</label><input type="text" id="s-title" class="fi2" placeholder="Nama layanan"></div>
+              <div class="fg"><label class="lbl2">Emoji Ikon</label><input type="text" id="s-icon" class="fi2" value="🔧"></div>
+            </div>
+            <div class="fg" style="margin-bottom:16px;"><label class="lbl2">Deskripsi</label><textarea id="s-desc" class="ft2" style="min-height:80px;" placeholder="Jelaskan layanan..."></textarea></div>
+            <div class="fg" style="margin-bottom:16px;">
+              <label class="lbl2">Foto Layanan (opsional)</label>
+              <div class="upload-box" id="s-upload-box">
+                <input type="file" id="s-file" accept="image/*" onchange="previewUpload(this,'s-preview','s-upload-box','s-change-lbl')">
+                <div class="upload-empty" id="s-upload-empty">
+                  <div class="ico">🖼️</div>
+                  <div class="ttl">Klik atau drag foto ke sini</div>
+                  <div class="hint">JPG, PNG, WEBP — Maks. 5MB</div>
+                </div>
+                <img id="s-preview" class="upload-preview-img" alt="preview">
+                <div class="upload-change" id="s-change-lbl">Ganti Foto</div>
+              </div>
+            </div>
+            <div class="upload-bar-wrap" id="s-bar-wrap"><div class="upload-bar"><div class="upload-bar-fill" id="s-bar-fill"></div></div><div class="upload-bar-txt" id="s-bar-txt"></div></div>
+            <button class="btn-sm" id="s-submit" onclick="addService()" style="margin-top:4px;">Tambah Layanan</button>
+          </div>
+        </div>
+        <div class="panel"><div class="ph"><div class="pt">⚙️ Daftar Layanan</div></div><div class="pb" style="padding:0;overflow-x:auto;"><table class="tbl" id="svc-table"></table></div></div>
+      </div>
+
+
+      <!-- PENGATURAN -->
+      <div id="sec-pengaturan" style="display:none">
+
+        <!-- Identitas Perusahaan -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">🏢 Identitas Perusahaan</div></div>
+          <div class="pb">
+            <div class="frow" style="margin-bottom:16px;">
+              <div class="fg"><label class="lbl2">Nama Perusahaan</label><input type="text" id="cfg-site_name" class="fi2" placeholder="PT Nama Perusahaan"></div>
+              <div class="fg"><label class="lbl2">Tagline / Est.</label><input type="text" id="cfg-site_tagline" class="fi2" placeholder="Est. 2010"></div>
+            </div>
+            <div class="fg" style="margin-top:14px;">
+              <label class="lbl2">Logo Perusahaan</label>
+              <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+                <div id="logo-preview" style="width:56px;height:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;">🖼️</div>
+                <div>
+                  <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="previewLogo(this)">
+                  <button class="btn-sm" onclick="document.getElementById('logo-file').click()">Pilih Logo</button>
+                  <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">PNG/JPG, maks 2MB</p>
+                </div>
+              </div>
+            </div>
+            <button class="btn-sm" onclick="uploadAndSaveLogo()">Upload & Simpan Logo</button>
+            <button class="btn-sm" onclick="saveSettings(['site_name','site_tagline'])">Simpan Identitas</button>
+          </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">🦸 Hero / Banner Utama</div></div>
+          <div class="pb">
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Tag / Label kecil</label><input type="text" id="cfg-hero_tag" class="fi2" placeholder="🏢 Perusahaan Terpercaya"></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Judul Utama (boleh pakai &lt;em&gt; untuk italic emas)</label><input type="text" id="cfg-hero_title" class="fi2" placeholder="Solusi &lt;em&gt;Terbaik&lt;/em&gt; untuk Bisnis Anda"></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Deskripsi Hero</label><textarea id="cfg-hero_desc" class="ft2" style="min-height:80px;" placeholder="Deskripsi singkat perusahaan..."></textarea></div>
+            <div class="frow" style="margin-bottom:14px;">
+              <div class="fg"><label class="lbl2">Stat: Klien Puas</label><input type="text" id="cfg-stat_klien" class="fi2" placeholder="500+"></div>
+              <div class="fg"><label class="lbl2">Stat: Proyek Selesai</label><input type="text" id="cfg-stat_proyek" class="fi2" placeholder="350+"></div>
+              <div class="fg"><label class="lbl2">Stat: Tahun Pengalaman</label><input type="text" id="cfg-stat_tahun" class="fi2" placeholder="14"></div>
+            </div>
+            <button class="btn-sm" onclick="saveSettings(['hero_tag','hero_title','hero_desc','stat_klien','stat_proyek','stat_tahun'])">Simpan Hero</button>
+          </div>
+        </div>
+
+        <!-- Tentang Kami -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">📖 Tentang Kami</div></div>
+          <div class="pb">
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Judul Tentang (boleh pakai &lt;em&gt;)</label><input type="text" id="cfg-about_title" class="fi2" placeholder="Komitmen Kami untuk &lt;em&gt;Kualitas Terbaik&lt;/em&gt;"></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Deskripsi Tentang</label><textarea id="cfg-about_desc" class="ft2" style="min-height:70px;" placeholder="Deskripsi singkat perusahaan..."></textarea></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Tahun Pengalaman (badge)</label><input type="text" id="cfg-about_tahun" class="fi2" placeholder="14+"></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Visi</label><textarea id="cfg-visi" class="ft2" style="min-height:60px;" placeholder="Visi perusahaan..."></textarea></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Misi</label><textarea id="cfg-misi" class="ft2" style="min-height:60px;" placeholder="Misi perusahaan..."></textarea></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Nilai Perusahaan</label><textarea id="cfg-nilai" class="ft2" style="min-height:60px;" placeholder="Nilai-nilai perusahaan..."></textarea></div>
+            <button class="btn-sm" onclick="saveSettings(['about_title','about_desc','about_tahun','visi','misi','nilai'])">Simpan Tentang</button>
+          </div>
+        </div>
+
+        <!-- Kontak -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">📞 Informasi Kontak</div></div>
+          <div class="pb">
+            <div class="frow" style="margin-bottom:14px;">
+              <div class="fg"><label class="lbl2">Alamat</label><input type="text" id="cfg-kontak_alamat" class="fi2" placeholder="Jl. Contoh No. 123..."></div>
+              <div class="fg"><label class="lbl2">No. Telepon</label><input type="text" id="cfg-kontak_telp" class="fi2" placeholder="+62 21 1234 5678"></div>
+            </div>
+            <div class="frow" style="margin-bottom:14px;">
+              <div class="fg"><label class="lbl2">Email</label><input type="text" id="cfg-kontak_email" class="fi2" placeholder="info@perusahaan.co.id"></div>
+              <div class="fg"><label class="lbl2">Jam Kerja</label><input type="text" id="cfg-kontak_jam" class="fi2" placeholder="Senin – Jumat, 08.00 – 17.00 WIB"></div>
+            </div>
+            <button class="btn-sm" onclick="saveSettings(['kontak_alamat','kontak_telp','kontak_email','kontak_jam'])">Simpan Kontak</button>
+          </div>
+        </div>
+
+        <!-- Footer & Sosmed -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="ph"><div class="pt">🔗 Footer & Media Sosial</div></div>
+          <div class="pb">
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Deskripsi Footer</label><textarea id="cfg-footer_desc" class="ft2" style="min-height:70px;" placeholder="Deskripsi footer..."></textarea></div>
+            <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Teks Copyright</label><input type="text" id="cfg-footer_copy" class="fi2" placeholder="© 2025 PT Nama Perusahaan..."></div>
+            <div class="frow" style="margin-bottom:14px;">
+              <div class="fg"><label class="lbl2">Link Facebook</label><input type="text" id="cfg-sosmed_facebook" class="fi2" placeholder="https://facebook.com/..."></div>
+              <div class="fg"><label class="lbl2">Link Instagram</label><input type="text" id="cfg-sosmed_instagram" class="fi2" placeholder="https://instagram.com/..."></div>
+            </div>
+            <div class="frow" style="margin-bottom:14px;">
+              <div class="fg"><label class="lbl2">Link LinkedIn</label><input type="text" id="cfg-sosmed_linkedin" class="fi2" placeholder="https://linkedin.com/..."></div>
+              <div class="fg"><label class="lbl2">Link YouTube</label><input type="text" id="cfg-sosmed_youtube" class="fi2" placeholder="https://youtube.com/..."></div>
+            </div>
+            <button class="btn-sm" onclick="saveSettings(['footer_desc','footer_copy','sosmed_facebook','sosmed_instagram','sosmed_linkedin','sosmed_youtube'])">Simpan Footer & Sosmed</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PESAN -->
+      <div id="sec-pesan" style="display:none">
+        <div class="panel">
+          <div class="ph"><div class="pt">💬 Pesan dari Pengunjung</div></div>
+          <div class="pb" id="pesan-list" style="padding:16px;display:flex;flex-direction:column;gap:14px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><span id="t-ico">✅</span> <span id="t-msg"></span></div>
+
+<script>
+let TOKEN = sessionStorage.getItem('admin_token') || null;
+
+// AUTH
+async function doLogin(){
+  const btn=document.getElementById('login-btn'),err=document.getElementById('login-err');
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value.trim();
+  if(!u||!p){showErr('Isi username dan password.');return;}
+  btn.textContent='Memuat...';btn.classList.add('disabled');
+  try{
+    const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(d.ok){TOKEN=d.token;sessionStorage.setItem('admin_token',TOKEN);err.style.display='none';enterAdmin();}
+    else showErr(d.error||'Login gagal.');
+  }catch(e){showErr('Tidak dapat terhubung ke server.');}
+  btn.textContent='Masuk ke Admin';btn.classList.remove('disabled');
+}
+function showErr(m){const e=document.getElementById('login-err');e.textContent=m;e.style.display='block';}
+function doLogout(){TOKEN=null;sessionStorage.removeItem('admin_token');document.getElementById('admin-wrap').classList.remove('active');document.getElementById('login-wrap').style.display='flex';document.getElementById('lp').value='';}
+function enterAdmin(){
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('admin-wrap').classList.add('active');
+  document.getElementById('admin-date').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  loadStats();
+  loadSettings();
+  updatePesanBadge();
+}
+if(TOKEN) enterAdmin();
+loadLoginBranding();
+
+// Tampilkan logo & nama perusahaan di halaman login (sebelum login)
+async function loadLoginBranding(){
+  try{
+    const r=await fetch('/api/get-data?table=settings');
+    const arr=await r.json();
+    if(!Array.isArray(arr))return;
+    const siteName=arr.find(x=>x.key==='site_name');
+    const siteLogo=arr.find(x=>x.key==='site_logo');
+    if(siteName&&siteName.value){
+      const p=document.getElementById('login-company-name');
+      if(p)p.textContent=siteName.value;
+    }
+    if(siteLogo&&siteLogo.value){
+      const img=document.getElementById('login-logo-img');
+      const icon=document.getElementById('login-logo-icon');
+      if(img){img.src=siteLogo.value;img.style.display='block';}
+      if(icon)icon.textContent='';
+      if(img&&icon)icon.prepend(img);
+    }
+  }catch(e){/* abaikan, biarkan default tampil */}
+}
+
+// API
+async function api(fn,body){
+  const r=await fetch(`/api/${fn}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,...body})});
+  return r.json();
+}
+async function getData(table){
+  const r=await fetch(`/api/get-data?table=${table}`);
+  return r.json();
+}
+
+// SECTIONS
+function showSec(name,el){
+  ['dashboard','berita','galeri','layanan','pengaturan','pesan'].forEach(s=>document.getElementById('sec-'+s).style.display='none');
+  document.getElementById('sec-'+name).style.display='block';
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('page-title').textContent={dashboard:'Dashboard',berita:'Berita & Artikel',galeri:'Galeri',layanan:'Layanan',pengaturan:'Pengaturan Website',pesan:'Pesan Masuk'}[name]||name;
+  if(name==='berita')renderNews();
+  if(name==='galeri')renderGal();
+  if(name==='layanan')renderSvc();
+  if(name==='pengaturan')loadSettings();
+  if(name==='pesan')renderPesan();
+}
+
+async function loadStats(){
+  const[n,g,s,v]=await Promise.all([getData('news'),getData('gallery'),getData('services'),getData('visitors')]);
+  document.getElementById('d-berita').textContent=Array.isArray(n)?n.length:0;
+  document.getElementById('d-galeri').textContent=Array.isArray(g)?g.length:0;
+  document.getElementById('d-layanan').textContent=Array.isArray(s)?s.length:0;
+  document.getElementById('d-pengunjung').textContent=Array.isArray(v)?v.length.toLocaleString('id-ID'):0;
+}
+
+async function loadSettings(){
+  const arr=await getData('settings');
+  if(!Array.isArray(arr))return;
+  arr.forEach(({key,value})=>{
+    const el=document.getElementById('cfg-'+key);
+    if(el)el.value=value||'';
+  });
+  // Update nama & logo di sidebar
+  const siteName = arr.find(x=>x.key==='site_name');
+  if(siteName&&siteName.value){
+    const sb=document.getElementById('sb-company-name');
+    if(sb)sb.textContent=siteName.value;
   }
-};
+  const siteLogo = arr.find(x=>x.key==='site_logo');
+  if(siteLogo&&siteLogo.value){
+    const img=document.getElementById('sb-logo-img');
+    if(img){img.src=siteLogo.value;img.style.display='block';}
+    const prev=document.getElementById('logo-preview');
+    if(prev){prev.innerHTML='<img src="'+siteLogo.value+'" style="width:100%;height:100%;object-fit:contain;">';}
+  }
+}
+
+async function saveSettings(keys){
+  for(const key of keys){
+    const el=document.getElementById('cfg-'+key);
+    if(!el)continue;
+    const value=el.value;
+    await api('upsert-settings',{key,value});
+  }
+  toast('Pengaturan berhasil disimpan!');
+}
+
+// UPLOAD HELPERS
+function previewUpload(input,prevId,boxId,changeLblId){
+  const file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){toast('Ukuran foto maks. 5MB!','err');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById(prevId);
+    prev.src=e.target.result;prev.style.display='block';
+    const box=document.getElementById(boxId);box.classList.add('has-img');
+    const empty=box.querySelector('.upload-empty');if(empty)empty.style.display='none';
+    const lbl=document.getElementById(changeLblId);if(lbl)lbl.style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadFile(prefix){
+  const fileInput=document.getElementById(prefix+'-file');
+  const file=fileInput.files[0];
+  if(!file)return null;
+  setBar(prefix,20,'Mengupload foto...');
+  const base64=await fileToBase64(file);
+  setBar(prefix,60,'Menyimpan ke storage...');
+  const r=await fetch('/api/upload-image',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({token:TOKEN,filename:file.name,filedata:base64,mimetype:file.type})
+  });
+  const d=await r.json();
+  setBar(prefix,90,'Hampir selesai...');
+  if(!d.url){toast('Upload foto gagal: '+(d.error||'error'),'err');setBar(prefix,0,'');return null;}
+  return d.url;
+}
+
+function setBar(prefix,pct,txt){
+  const wrap=document.getElementById(prefix+'-bar-wrap');
+  const fill=document.getElementById(prefix+'-bar-fill');
+  const label=document.getElementById(prefix+'-bar-txt');
+  if(!wrap)return;
+  wrap.style.display=pct>0?'block':'none';
+  if(fill)fill.style.width=pct+'%';
+  if(label)label.textContent=txt;
+}
+
+function setLoading(btnId,loading){
+  const b=document.getElementById(btnId);if(!b)return;
+  b.classList.toggle('disabled',loading);
+  if(loading)b.dataset.orig=b.textContent,b.textContent='Menyimpan...';
+  else b.textContent=b.dataset.orig||b.textContent;
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+}
+
+function resetSection(prefix){
+  ['title','body','desc','icon'].forEach(f=>{const el=document.getElementById(prefix+'-'+f);if(el)el.value=el.defaultValue||'';});
+  const prev=document.getElementById(prefix+'-preview');if(prev){prev.src='';prev.style.display='none';}
+  const box=document.getElementById(prefix+'-upload-box');if(box){box.classList.remove('has-img');const e=box.querySelector('.upload-empty');if(e)e.style.display='flex';}
+  const lbl=document.getElementById(prefix+'-change-lbl');if(lbl)lbl.style.display='none';
+  const fi=document.getElementById(prefix+'-file');if(fi)fi.value='';
+  setBar(prefix,0,'');
+}
+
+// NEWS
+async function addNews(){
+  const title=document.getElementById('n-title').value.trim();
+  const body=document.getElementById('n-body').value.trim();
+  if(!title||!body){toast('Isi judul dan isi berita!','err');return;}
+  setLoading('n-submit',true);
+  let image_url=null;
+  if(document.getElementById('n-file').files[0]) image_url=await uploadFile('n');
+  setBar('n',95,'Menyimpan berita...');
+  await api('save-data',{table:'news',data:{title,cat:document.getElementById('n-cat').value,body,icon:document.getElementById('n-icon').value||'📰',status:document.getElementById('n-status').value,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),image_url}});
+  setBar('n',0,'');setLoading('n-submit',false);
+  resetSection('n');renderNews();loadStats();toast('Berita berhasil ditambahkan!');
+}
+async function delNews(id){if(!confirm('Hapus berita ini?'))return;await api('delete-data',{table:'news',id});renderNews();loadStats();toast('Berita dihapus.');}
+async function toggleNews(id,cur){await api('update-data',{table:'news',id,data:{status:cur==='published'?'draft':'published'}});renderNews();toast('Status diperbarui.');}
+async function renderNews(){
+  const data=await getData('news');if(!Array.isArray(data))return;
+  document.getElementById('news-table').innerHTML=
+    `<thead><tr><th>Foto</th><th>Judul</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`+
+    data.map(n=>`<tr>
+      <td>${n.image_url?`<img src="${n.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${n.icon||'📰'}</div>`}</td>
+      <td><div class="tbl-title">${n.title}</div><div class="tbl-meta">${n.body.slice(0,50)}...</div></td>
+      <td>${n.cat}</td><td>${n.date}</td>
+      <td><span class="pill ${n.status}" onclick="toggleNews(${n.id},'${n.status}')">${n.status==='published'?'Tayang':'Draft'}</span></td>
+      <td><button class="tbl-del" onclick="delNews(${n.id})">Hapus</button></td>
+    </tr>`).join('')+'</tbody>';
+}
+
+// GALLERY
+async function addGallery(){
+  const title=document.getElementById('g-title').value.trim();
+  if(!title){toast('Isi judul foto!','err');return;}
+  if(!document.getElementById('g-file').files[0]){toast('Pilih foto terlebih dahulu!','err');return;}
+  setLoading('g-submit',true);
+  const image_url=await uploadFile('g');
+  if(!image_url){setLoading('g-submit',false);return;}
+  setBar('g',95,'Menyimpan...');
+  await api('save-data',{table:'gallery',data:{title,icon:'🖼️',descr:document.getElementById('g-desc').value,image_url}});
+  setBar('g',0,'');setLoading('g-submit',false);
+  resetSection('g');document.getElementById('g-title').value='';document.getElementById('g-desc').value='';
+  renderGal();loadStats();toast('Foto berhasil diupload!');
+}
+async function delGal(id){if(!confirm('Hapus foto ini?'))return;await api('delete-data',{table:'gallery',id});renderGal();loadStats();toast('Foto dihapus.');}
+async function renderGal(){
+  const data=await getData('gallery');if(!Array.isArray(data))return;
+  document.getElementById('gal-table').innerHTML=
+    `<thead><tr><th>Foto</th><th>Judul</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>`+
+    data.map(g=>`<tr>
+      <td>${g.image_url?`<img src="${g.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${g.icon||'🖼️'}</div>`}</td>
+      <td><div class="tbl-title">${g.title}</div></td>
+      <td>${g.descr||'-'}</td>
+      <td><button class="tbl-del" onclick="delGal(${g.id})">Hapus</button></td>
+    </tr>`).join('')+'</tbody>';
+}
+
+// SERVICES
+async function addService(){
+  const title=document.getElementById('s-title').value.trim();
+  const descr=document.getElementById('s-desc').value.trim();
+  if(!title||!descr){toast('Isi nama dan deskripsi!','err');return;}
+  setLoading('s-submit',true);
+  let image_url=null;
+  if(document.getElementById('s-file').files[0]) image_url=await uploadFile('s');
+  setBar('s',95,'Menyimpan...');
+  await api('save-data',{table:'services',data:{icon:document.getElementById('s-icon').value||'🔧',title,descr,image_url}});
+  setBar('s',0,'');setLoading('s-submit',false);
+  resetSection('s');document.getElementById('s-title').value='';document.getElementById('s-desc').value='';document.getElementById('s-icon').value='🔧';
+  renderSvc();loadStats();toast('Layanan berhasil ditambahkan!');
+}
+async function delSvc(id){if(!confirm('Hapus layanan ini?'))return;await api('delete-data',{table:'services',id});renderSvc();loadStats();toast('Layanan dihapus.');}
+async function renderSvc(){
+  const data=await getData('services');if(!Array.isArray(data))return;
+  document.getElementById('svc-table').innerHTML=
+    `<thead><tr><th>Foto</th><th>Ikon</th><th>Nama Layanan</th><th>Deskripsi</th><th>Aksi</th></tr></thead><tbody>`+
+    data.map(s=>`<tr>
+      <td>${s.image_url?`<img src="${s.image_url}" class="tbl-thumb" alt="">`:`<div class="tbl-thumb-ph">${s.icon||'🔧'}</div>`}</td>
+      <td style="font-size:22px;text-align:center;">${s.icon}</td>
+      <td><div class="tbl-title">${s.title}</div></td>
+      <td style="font-size:12px;color:var(--gray);max-width:240px;">${s.descr}</td>
+      <td><button class="tbl-del" onclick="delSvc(${s.id})">Hapus</button></td>
+    </tr>`).join('')+'</tbody>';
+}
+
+// TOAST
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  document.getElementById('t-ico').textContent=type==='err'?'❌':'✅';
+  document.getElementById('t-msg').textContent=msg;
+  t.className='toast'+(type==='err'?' err':'');
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// RIPPLE
+document.addEventListener('click',e=>{
+  const el=e.target.closest('.btn,.btn-sm,.btn-cancel,.sb-link,.tbl-del');if(!el)return;
+  if(getComputedStyle(el).position==='static')el.style.position='relative';
+  el.style.overflow='hidden';
+  const r=document.createElement('span');r.className='ripple';
+  const rect=el.getBoundingClientRect(),size=Math.max(rect.width,rect.height)*2.5;
+  r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  el.appendChild(r);r.addEventListener('animationend',()=>r.remove());
+});
+
+setTimeout(()=>{const u=document.getElementById('lu');if(u&&document.getElementById('login-wrap').style.display!=='none')u.focus();},100);
+
+function previewLogo(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('logo-preview').innerHTML='<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:contain;">';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function uploadAndSaveLogo(){
+  const file=document.getElementById('logo-file').files[0];
+  if(!file){toast('Pilih logo terlebih dahulu!','err');return;}
+  const base64=await toBase64(file);
+  const url=await uploadFile2(file.name,base64,file.type);
+  if(!url){toast('Gagal upload logo!','err');return;}
+  await api('upsert-settings',{key:'site_logo',value:url});
+  const img=document.getElementById('sb-logo-img');
+  if(img){img.src=url;img.style.display='block';}
+  toast('Logo berhasil disimpan!');
+}
+
+async function toBase64(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+}
+
+async function uploadFile2(filename,base64,mimetype){
+  try{
+    const r=await fetch('/api/upload-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype})});
+    const d=await r.json();
+    return d.url||null;
+  }catch{return null;}
+}
+
+async function renderPesan(){
+  const data=await getData('pesan');
+  const el=document.getElementById('pesan-list');
+  if(!Array.isArray(data)||data.length===0){el.innerHTML='<p style="color:rgba(255,255,255,0.4);">Belum ada pesan masuk.</p>';updatePesanBadge(data);return;}
+  // Pesan terbaru di atas
+  const sorted=[...data].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  el.innerHTML=sorted.map(p=>{
+    const status=p.status||'baru';
+    const isBaru=status==='baru';
+    const waNum=(p.telp||'').replace(/[^0-9]/g,'');
+    const waLink=waNum?`https://wa.me/${waNum.startsWith('0')?'62'+waNum.slice(1):waNum}?text=${encodeURIComponent('Halo '+(p.nama||'')+', terima kasih sudah menghubungi kami mengenai "'+(p.subjek||'pesan Anda')+'".')}`:null;
+    const mailLink=`mailto:${p.email}?subject=${encodeURIComponent('Re: '+(p.subjek||'Pesan Anda'))}&body=${encodeURIComponent('Halo '+(p.nama||'')+',\n\nTerima kasih telah menghubungi kami.\n\n')}`;
+    return `
+    <div style="background:rgba(255,255,255,0.04);border:1px solid ${isBaru?'rgba(244,162,97,0.4)':'rgba(255,255,255,0.08)'};border-radius:12px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
+        <div>
+          <strong style="color:#fff;">${p.nama||'-'}</strong>
+          <span style="color:var(--gold);font-size:12px;margin-left:8px;">${p.email||''}</span>
+          ${isBaru?'<span style="background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;">BARU</span>':'<span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px;">SUDAH DIBALAS</span>'}
+        </div>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);white-space:nowrap;">${new Date(p.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      ${p.subjek?`<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Subjek: ${p.subjek}</div>`:''}
+      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.5;margin-bottom:14px;">${p.isi||'-'}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="${mailLink}" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">✉️ Balas Email</a>
+        ${waLink?`<a href="${waLink}" target="_blank" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;">💬 Balas WhatsApp</a>`:''}
+        <button class="btn-cancel" onclick="togglePesanStatus(${p.id},'${status}')">${isBaru?'✓ Tandai Sudah Dibalas':'↺ Tandai Belum Dibalas'}</button>
+        <button class="btn-cancel" style="color:#e63946;border-color:rgba(230,57,70,0.4);" onclick="deletePesan(${p.id})">🗑️ Hapus</button>
+      </div>
+    </div>`;
+  }).join('');
+  updatePesanBadge(data);
+}
+
+async function togglePesanStatus(id,currentStatus){
+  const newStatus=currentStatus==='baru'?'dibalas':'baru';
+  await api('update-data',{table:'pesan',id,data:{status:newStatus}});
+  renderPesan();
+}
+
+async function deletePesan(id){
+  if(!confirm('Hapus pesan ini? Tindakan tidak bisa dibatalkan.'))return;
+  await api('delete-data',{table:'pesan',id});
+  renderPesan();
+}
+
+async function updatePesanBadge(data){
+  let list=data;
+  if(!list){
+    try{list=await getData('pesan');}catch{list=[];}
+  }
+  const badge=document.getElementById('pesan-badge');
+  if(!badge)return;
+  const belum=Array.isArray(list)?list.filter(p=>(p.status||'baru')==='baru').length:0;
+  if(belum>0){badge.textContent=belum;badge.style.display='inline-block';}
+  else{badge.style.display='none';}
+}
+</script>
+</body>
+</html>
