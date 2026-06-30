@@ -168,6 +168,10 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
       <div class="sb-link" onclick="showSec('pengaturan',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan
       </div>
+      <div class="sb-link" onclick="showSec('pesan',this)" style="position:relative;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Pesan Masuk
+        <span id="pesan-badge" style="display:none;margin-left:auto;background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;">0</span>
+      </div>
       <div class="sb-sec">Lainnya</div>
       <div class="sb-link" onclick="window.open('/','_blank')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Lihat Website
@@ -398,6 +402,15 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
         </div>
 
       </div>
+
+      <!-- PESAN -->
+      <div id="sec-pesan" style="display:none">
+        <div class="panel">
+          <div class="ph"><div class="pt">💬 Pesan dari Pengunjung</div></div>
+          <div class="pb" id="pesan-list" style="padding:16px;display:flex;flex-direction:column;gap:14px;"></div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -429,6 +442,7 @@ function enterAdmin(){
   document.getElementById('admin-date').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   loadStats();
   loadSettings();
+  updatePesanBadge();
 }
 if(TOKEN) enterAdmin();
 loadLoginBranding();
@@ -467,11 +481,11 @@ async function getData(table){
 
 // SECTIONS
 function showSec(name,el){
-  ['dashboard','berita','galeri','layanan','pengaturan'].forEach(s=>document.getElementById('sec-'+s).style.display='none');
+  ['dashboard','berita','galeri','layanan','pengaturan','pesan'].forEach(s=>document.getElementById('sec-'+s).style.display='none');
   document.getElementById('sec-'+name).style.display='block';
   document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
   if(el)el.classList.add('active');
-  document.getElementById('page-title').textContent={dashboard:'Dashboard',berita:'Berita & Artikel',galeri:'Galeri',layanan:'Layanan',pengaturan:'Pengaturan Website'}[name]||name;
+  document.getElementById('page-title').textContent={dashboard:'Dashboard',berita:'Berita & Artikel',galeri:'Galeri',layanan:'Layanan',pengaturan:'Pengaturan Website',pesan:'Pesan Masuk'}[name]||name;
   if(name==='berita')renderNews();
   if(name==='galeri')renderGal();
   if(name==='layanan')renderSvc();
@@ -722,20 +736,53 @@ async function uploadFile2(filename,base64,mimetype){
 async function renderPesan(){
   const data=await getData('pesan');
   const el=document.getElementById('pesan-list');
-  if(!Array.isArray(data)||data.length===0){el.innerHTML='<p style="color:rgba(255,255,255,0.4);">Belum ada pesan masuk.</p>';return;}
-  el.innerHTML=data.map(p=>`
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+  if(!Array.isArray(data)||data.length===0){el.innerHTML='<p style="color:rgba(255,255,255,0.4);">Belum ada pesan masuk.</p>';updatePesanBadge(data);return;}
+  // Pesan terbaru di atas
+  const sorted=[...data].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  el.innerHTML=sorted.map(p=>{
+    const status=p.status||'baru';
+    const isBaru=status==='baru';
+    const waNum=(p.telp||'').replace(/[^0-9]/g,'');
+    const waLink=waNum?`https://wa.me/${waNum.startsWith('0')?'62'+waNum.slice(1):waNum}?text=${encodeURIComponent('Halo '+(p.nama||'')+', terima kasih sudah menghubungi kami mengenai "'+(p.subjek||'pesan Anda')+'".')}`:null;
+    const mailLink=`mailto:${p.email}?subject=${encodeURIComponent('Re: '+(p.subjek||'Pesan Anda'))}&body=${encodeURIComponent('Halo '+(p.nama||'')+',\n\nTerima kasih telah menghubungi kami.\n\n')}`;
+    return `
+    <div style="background:rgba(255,255,255,0.04);border:1px solid ${isBaru?'rgba(244,162,97,0.4)':'rgba(255,255,255,0.08)'};border-radius:12px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
         <div>
           <strong style="color:#fff;">${p.nama||'-'}</strong>
           <span style="color:var(--gold);font-size:12px;margin-left:8px;">${p.email||''}</span>
+          ${isBaru?'<span style="background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;">BARU</span>':'<span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px;">SUDAH DIBALAS</span>'}
         </div>
-        <span style="font-size:11px;color:rgba(255,255,255,0.3);">${new Date(p.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);white-space:nowrap;">${new Date(p.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
       </div>
       ${p.subjek?`<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Subjek: ${p.subjek}</div>`:''}
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.5;">${p.isi||'-'}</p>
-    </div>
-  `).join('');
+      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.5;margin-bottom:14px;">${p.isi||'-'}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="${mailLink}" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">✉️ Balas Email</a>
+        ${waLink?`<a href="${waLink}" target="_blank" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;">💬 Balas WhatsApp</a>`:''}
+        <button class="btn-cancel" onclick="togglePesanStatus(${p.id},'${status}')">${isBaru?'✓ Tandai Sudah Dibalas':'↺ Tandai Belum Dibalas'}</button>
+      </div>
+    </div>`;
+  }).join('');
+  updatePesanBadge(data);
+}
+
+async function togglePesanStatus(id,currentStatus){
+  const newStatus=currentStatus==='baru'?'dibalas':'baru';
+  await api('update-data',{table:'pesan',id,data:{status:newStatus}});
+  renderPesan();
+}
+
+async function updatePesanBadge(data){
+  let list=data;
+  if(!list){
+    try{list=await getData('pesan');}catch{list=[];}
+  }
+  const badge=document.getElementById('pesan-badge');
+  if(!badge)return;
+  const belum=Array.isArray(list)?list.filter(p=>(p.status||'baru')==='baru').length:0;
+  if(belum>0){badge.textContent=belum;badge.style.display='inline-block';}
+  else{badge.style.display='none';}
 }
 </script>
 </body>
