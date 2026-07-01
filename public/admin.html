@@ -925,6 +925,23 @@ async function uploadFile2(filename,base64,mimetype){
   }catch{return null;}
 }
 
+/* =========================================================
+   PESAN MASUK — DIPERBAIKI
+   1) escapeHtml() supaya isi pesan dari pengunjung tidak
+      merusak markup HTML (dan bukan celah injeksi).
+   2) Tombol "Tandai Sudah Dibalas" & "Hapus" tidak lagi
+      pakai onclick="fn(${p.id})" (bisa error kalau id
+      berupa string/UUID) — sekarang pakai data-id +
+      event delegation sehingga aman untuk id angka
+      maupun string.
+   ========================================================= */
+
+function escapeHtml(str){
+  return String(str??'').replace(/[&<>"']/g, m => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[m]));
+}
+
 async function renderPesan(){
   const data=await getData('pesan');
   const el=document.getElementById('pesan-list');
@@ -942,39 +959,53 @@ async function renderPesan(){
     const waLink=waNum?`https://wa.me/${waNum.startsWith('0')?'62'+waNum.slice(1):waNum}?text=${encodeURIComponent('Halo '+(p.nama||'')+', terima kasih sudah menghubungi kami mengenai "'+(p.subjek||'pesan Anda')+'".')}`:null;
     const mailLink=`mailto:${p.email}?subject=${encodeURIComponent('Re: '+(p.subjek||'Pesan Anda'))}&body=${encodeURIComponent('Halo '+(p.nama||'')+',\n\nTerima kasih telah menghubungi kami.\n\n')}`;
     return `
-    <div style="background:#fff;border:1px solid ${isBaru?'rgba(244,162,97,0.45)':'var(--border)'};border-radius:12px;padding:16px;box-shadow:${isBaru?'0 4px 16px rgba(244,162,97,0.15)':'0 1px 3px rgba(22,40,63,0.05)'};transition:box-shadow .25s ease;">
+    <div class="pesan-card" data-id="${escapeHtml(p.id)}" data-status="${status}" style="background:#fff;border:1px solid ${isBaru?'rgba(244,162,97,0.45)':'var(--border)'};border-radius:12px;padding:16px;box-shadow:${isBaru?'0 4px 16px rgba(244,162,97,0.15)':'0 1px 3px rgba(22,40,63,0.05)'};transition:box-shadow .25s ease;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
         <div>
-          <strong style="color:var(--navy);">${p.nama||'-'}</strong>
-          <span style="color:#EE8C4F;font-size:12px;margin-left:8px;">${p.email||''}</span>
+          <strong style="color:var(--navy);">${escapeHtml(p.nama)||'-'}</strong>
+          <span style="color:#EE8C4F;font-size:12px;margin-left:8px;">${escapeHtml(p.email)}</span>
           ${isBaru?'<span style="background:linear-gradient(135deg,var(--gold),#EE8C4F);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;">BARU</span>':'<span style="background:var(--gray-light);color:var(--gray);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px;">SUDAH DIBALAS</span>'}
         </div>
         <span style="font-size:11px;color:var(--gray);white-space:nowrap;">${new Date(p.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
       </div>
-      ${p.subjek?`<div style="font-size:12px;color:var(--gray);margin-bottom:6px;">Subjek: ${p.subjek}</div>`:''}
-      <p style="color:var(--text);font-size:14px;line-height:1.5;margin-bottom:14px;">${p.isi||'-'}</p>
+      ${p.subjek?`<div style="font-size:12px;color:var(--gray);margin-bottom:6px;">Subjek: ${escapeHtml(p.subjek)}</div>`:''}
+      <p style="color:var(--text);font-size:14px;line-height:1.5;margin-bottom:14px;">${escapeHtml(p.isi)||'-'}</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="${mailLink}" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">✉️ Balas Email</a>
         ${waLink?`<a href="${waLink}" target="_blank" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;">💬 Balas WhatsApp</a>`:''}
-        <button class="btn-cancel" onclick="togglePesanStatus(${p.id},'${status}')">${isBaru?'✓ Tandai Sudah Dibalas':'↺ Tandai Belum Dibalas'}</button>
-        <button class="btn-cancel" style="color:#e63946;border-color:rgba(230,57,70,0.4);" onclick="deletePesan(${p.id})">🗑️ Hapus</button>
+        <button class="btn-cancel pesan-toggle-btn">${isBaru?'✓ Tandai Sudah Dibalas':'↺ Tandai Belum Dibalas'}</button>
+        <button class="btn-cancel pesan-delete-btn" style="color:#e63946;border-color:rgba(230,57,70,0.4);">🗑️ Hapus</button>
       </div>
     </div>`;
   }).join('');
   updatePesanBadge(data);
 }
 
-async function togglePesanStatus(id,currentStatus){
-  const newStatus=currentStatus==='baru'?'dibalas':'baru';
-  await api('update-data',{table:'pesan',id,data:{status:newStatus}});
-  renderPesan();
-}
+// Event delegation: satu listener untuk semua tombol toggle/hapus pesan,
+// aman untuk id berupa angka maupun string/UUID
+document.addEventListener('click', async (e)=>{
+  const toggleBtn = e.target.closest('.pesan-toggle-btn');
+  const delBtn = e.target.closest('.pesan-delete-btn');
+  if(!toggleBtn && !delBtn) return;
 
-async function deletePesan(id){
-  if(!confirm('Hapus pesan ini? Tindakan tidak bisa dibatalkan.'))return;
-  await api('delete-data',{table:'pesan',id});
-  renderPesan();
-}
+  const card = e.target.closest('.pesan-card');
+  if(!card) return;
+  const id = card.dataset.id;
+  const status = card.dataset.status;
+
+  if(toggleBtn){
+    const newStatus = status==='baru' ? 'dibalas' : 'baru';
+    await api('update-data',{table:'pesan', id, data:{status:newStatus}});
+    renderPesan();
+    toast('Status diperbarui.');
+  }
+  if(delBtn){
+    if(!confirm('Hapus pesan ini? Tindakan tidak bisa dibatalkan.')) return;
+    await api('delete-data',{table:'pesan', id});
+    renderPesan();
+    toast('Pesan dihapus.');
+  }
+});
 
 async function updatePesanBadge(data){
   let list=data;
