@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1B4332">
+<meta name="theme-color" content="#16283F">
 <title>Admin Panel — PT Nama Perusahaan</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#1B4332;--navy2:#2D6A4F;--gold:#F4A261;--gold-light:#FFDDD2;--cream:#F8F9F4;--gray:#6B7280;--gray-light:#F3F4F6;--border:#E5E7EB;--text:#1A202C;--radius:10px;--radius-lg:16px;--shadow-sm:0 1px 2px rgba(27,67,50,0.06),0 1px 1px rgba(27,67,50,0.04);--shadow-md:0 4px 14px rgba(27,67,50,0.08),0 1px 3px rgba(27,67,50,0.06);--shadow-lg:0 12px 32px rgba(27,67,50,0.14),0 2px 8px rgba(27,67,50,0.08);--transition:all 0.25s cubic-bezier(.4,0,.2,1);--sw:210px;}
+:root{--navy:#16283F;--navy2:#1F3B5C;--gold:#F4A261;--gold-light:#FFDDD2;--cream:#F8F9F4;--gray:#6B7280;--gray-light:#F3F4F6;--border:#E5E7EB;--text:#1A202C;--radius:10px;--radius-lg:16px;--shadow-sm:0 1px 2px rgba(22,40,63,0.06),0 1px 1px rgba(22,40,63,0.04);--shadow-md:0 4px 14px rgba(22,40,63,0.08),0 1px 3px rgba(22,40,63,0.06);--shadow-lg:0 12px 32px rgba(22,40,63,0.14),0 2px 8px rgba(22,40,63,0.08);--transition:all 0.25s cubic-bezier(.4,0,.2,1);--sw:210px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--cream);-webkit-font-smoothing:antialiased;}
 a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
 /* LOGIN */
-.login-page{min-height:100vh;background:radial-gradient(circle at 20% 20%,rgba(244,162,97,0.08),transparent 40%),radial-gradient(circle at 80% 80%,rgba(45,106,79,0.3),transparent 50%),linear-gradient(160deg,var(--navy) 0%,#0F2A1E 100%);display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-page{min-height:100vh;background:radial-gradient(circle at 20% 20%,rgba(244,162,97,0.08),transparent 40%),radial-gradient(circle at 80% 80%,rgba(31,59,92,0.3),transparent 50%),linear-gradient(160deg,var(--navy) 0%,#0A1626 100%);display:flex;align-items:center;justify-content:center;padding:24px;}
 .login-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-lg);padding:40px;width:100%;max-width:400px;backdrop-filter:blur(24px);box-shadow:0 20px 60px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.08);}
 .login-logo{text-align:center;margin-bottom:32px;}
 .login-logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:var(--navy);margin:0 auto 12px;box-shadow:0 8px 20px rgba(244,162,97,0.35);}
@@ -25,9 +25,9 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .fi{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:11px 14px;font-size:14px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);}
 .fi::placeholder{color:rgba(255,255,255,0.3);}
 .fi:focus{border-color:var(--gold);background:rgba(255,255,255,0.08);}
-.fi2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);box-shadow:inset 0 1px 2px rgba(27,67,50,0.04);}
+.fi2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);box-shadow:inset 0 1px 2px rgba(22,40,63,0.04);}
 .fi2:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(244,162,97,0.12);}
-.ft2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);resize:vertical;min-height:110px;box-shadow:inset 0 1px 2px rgba(27,67,50,0.04);}
+.ft2{width:100%;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:var(--transition);resize:vertical;min-height:110px;box-shadow:inset 0 1px 2px rgba(22,40,63,0.04);}
 .ft2:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(244,162,97,0.12);}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .login-err{background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);color:#FCA5A5;border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
@@ -45,7 +45,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 /* LAYOUT */
 .admin-wrap{display:none;}
 .admin-wrap.active{display:flex;min-height:100vh;}
-.sidebar{background:linear-gradient(180deg,var(--navy) 0%,#15382a 100%);position:fixed;top:0;bottom:0;width:var(--sw);display:flex;flex-direction:column;z-index:200;overflow-y:auto;box-shadow:4px 0 24px rgba(0,0,0,0.12);}
+.sidebar{background:linear-gradient(180deg,var(--navy) 0%,#101F33 100%);position:fixed;top:0;bottom:0;width:var(--sw);display:flex;flex-direction:column;z-index:200;overflow-y:auto;box-shadow:4px 0 24px rgba(0,0,0,0.12);}
 .sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
 .sb-logo h3{color:#fff;font-size:13px;font-weight:700;}
 .sb-logo p{color:rgba(255,255,255,0.4);font-size:11px;margin-top:2px;}
@@ -63,7 +63,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .sb-logout{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:var(--radius);padding:8px;font-size:12px;cursor:pointer;transition:var(--transition);font-family:inherit;}
 .sb-logout:hover{background:rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.3);color:#FCA5A5;}
 .main{margin-left:var(--sw);min-height:100vh;background:linear-gradient(180deg,#F8F9FA 0%,#F1F3F2 100%);flex:1;min-width:0;width:calc(100% - var(--sw));overflow-x:hidden;}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 3px rgba(27,67,50,0.04);}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 3px rgba(22,40,63,0.04);}
 .topbar h1{font-size:15px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .content{padding:20px;}
 
@@ -72,7 +72,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:var(--transition);box-shadow:var(--shadow-sm);}
 .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(244,162,97,0.3);}
 .stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.si-navy{background:linear-gradient(135deg,rgba(27,67,50,0.1),rgba(27,67,50,0.04));}
+.si-navy{background:linear-gradient(135deg,rgba(22,40,63,0.1),rgba(22,40,63,0.04));}
 .si-gold{background:linear-gradient(135deg,rgba(244,162,97,0.16),rgba(244,162,97,0.04));}
 .si-green{background:linear-gradient(135deg,rgba(16,185,129,0.16),rgba(16,185,129,0.04));}
 .si-blue{background:linear-gradient(135deg,rgba(59,130,246,0.16),rgba(59,130,246,0.04));}
@@ -373,12 +373,26 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Tag / Label kecil</label><input type="text" id="cfg-hero_tag" class="fi2" placeholder="🏢 Perusahaan Terpercaya"></div>
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Judul Utama (boleh pakai &lt;em&gt; untuk italic emas)</label><input type="text" id="cfg-hero_title" class="fi2" placeholder="Solusi &lt;em&gt;Terbaik&lt;/em&gt; untuk Bisnis Anda"></div>
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Deskripsi Hero</label><textarea id="cfg-hero_desc" class="ft2" style="min-height:80px;" placeholder="Deskripsi singkat perusahaan..."></textarea></div>
+            <div class="fg" style="margin-bottom:14px;">
+              <label class="lbl2">Foto / Gambar Hero (opsional)</label>
+              <div class="upload-box" id="h-upload-box">
+                <input type="file" id="h-file" accept="image/*" onchange="previewUpload(this,'h-preview','h-upload-box','h-change-lbl')">
+                <div class="upload-empty" id="h-upload-empty">
+                  <div class="ico">🖼️</div>
+                  <div class="ttl">Klik atau drag foto ke sini</div>
+                  <div class="hint">JPG, PNG, WEBP — Maks. 5MB</div>
+                </div>
+                <img id="h-preview" class="upload-preview-img" alt="preview">
+                <div class="upload-change" id="h-change-lbl">Ganti Foto</div>
+              </div>
+              <div class="upload-bar-wrap" id="h-bar-wrap"><div class="upload-bar"><div class="upload-bar-fill" id="h-bar-fill"></div></div><div class="upload-bar-txt" id="h-bar-txt"></div></div>
+            </div>
             <div class="frow" style="margin-bottom:14px;">
               <div class="fg"><label class="lbl2">Stat: Klien Puas</label><input type="text" id="cfg-stat_klien" class="fi2" placeholder="500+"></div>
               <div class="fg"><label class="lbl2">Stat: Proyek Selesai</label><input type="text" id="cfg-stat_proyek" class="fi2" placeholder="350+"></div>
               <div class="fg"><label class="lbl2">Stat: Tahun Pengalaman</label><input type="text" id="cfg-stat_tahun" class="fi2" placeholder="14"></div>
             </div>
-            <button class="btn-sm" onclick="saveSettings(['hero_tag','hero_title','hero_desc','stat_klien','stat_proyek','stat_tahun'])">Simpan Hero</button>
+            <button class="btn-sm" id="h-submit" onclick="saveHero()">Simpan Hero</button>
           </div>
         </div>
 
@@ -556,16 +570,57 @@ async function loadSettings(){
     const prev=document.getElementById('logo-preview');
     if(prev){prev.innerHTML='<img src="'+siteLogo.value+'" style="width:100%;height:100%;object-fit:contain;">';}
   }
+  const heroImg = arr.find(x=>x.key==='hero_image');
+  if(heroImg&&heroImg.value&&!document.getElementById('h-file').files[0]){
+    const prev=document.getElementById('h-preview');
+    const box=document.getElementById('h-upload-box');
+    const empty=document.getElementById('h-upload-empty');
+    const lbl=document.getElementById('h-change-lbl');
+    if(prev){prev.src=heroImg.value;prev.style.display='block';}
+    if(box)box.classList.add('has-img');
+    if(empty)empty.style.display='none';
+    if(lbl)lbl.style.display='block';
+  }
 }
 
-async function saveSettings(keys){
-  for(const key of keys){
-    const el=document.getElementById('cfg-'+key);
-    if(!el)continue;
-    const value=el.value;
-    await api('upsert-settings',{key,value});
+async function saveSettings(keys, btnId){
+  if(btnId)setLoading(btnId,true);
+  try{
+    await Promise.all(keys.map(key=>{
+      const el=document.getElementById('cfg-'+key);
+      if(!el)return Promise.resolve();
+      return api('upsert-settings',{key,value:el.value});
+    }));
+    toast('Pengaturan berhasil disimpan!');
+  }catch(e){
+    toast('Gagal menyimpan pengaturan.','err');
   }
-  toast('Pengaturan berhasil disimpan!');
+  if(btnId)setLoading(btnId,false);
+}
+
+// Simpan Hero: upload foto (jika ada, dikompres dulu biar cepat) + semua field teks sekaligus
+async function saveHero(){
+  setLoading('h-submit',true);
+  try{
+    let hero_image=null;
+    if(document.getElementById('h-file').files[0]){
+      hero_image=await uploadFile('h');
+      if(!hero_image){setLoading('h-submit',false);return;}
+    }
+    const keys=['hero_tag','hero_title','hero_desc','stat_klien','stat_proyek','stat_tahun'];
+    const tasks=keys.map(key=>{
+      const el=document.getElementById('cfg-'+key);
+      if(!el)return Promise.resolve();
+      return api('upsert-settings',{key,value:el.value});
+    });
+    if(hero_image) tasks.push(api('upsert-settings',{key:'hero_image',value:hero_image}));
+    await Promise.all(tasks);
+    setBar('h',0,'');
+    toast('Hero berhasil disimpan!');
+  }catch(e){
+    toast('Gagal menyimpan hero.','err');
+  }
+  setLoading('h-submit',false);
 }
 
 // UPLOAD HELPERS
@@ -583,16 +638,54 @@ function previewUpload(input,prevId,boxId,changeLblId){
   reader.readAsDataURL(file);
 }
 
+// Kompres foto di browser sebelum upload (resize + JPEG quality) supaya proses upload jauh lebih cepat,
+// terutama untuk foto dari HP yang biasanya berukuran besar (3-12MB).
+function compressImage(file, maxDim=1600, quality=0.82, outFormat){
+  return new Promise((resolve,reject)=>{
+    if(!file.type||!file.type.startsWith('image/')){resolve(null);return;}
+    const format=outFormat||(file.type==='image/png'?'image/png':'image/jpeg');
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let {width,height}=img;
+      if(width>maxDim||height>maxDim){
+        if(width>height){height=Math.round(height*maxDim/width);width=maxDim;}
+        else{width=Math.round(width*maxDim/height);height=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=width;canvas.height=height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,width,height);
+      canvas.toBlob(blob=>resolve(blob),format,quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(null);};
+    img.src=url;
+  });
+}
+
 async function uploadFile(prefix){
   const fileInput=document.getElementById(prefix+'-file');
   const file=fileInput.files[0];
   if(!file)return null;
-  setBar(prefix,20,'Mengupload foto...');
-  const base64=await fileToBase64(file);
-  setBar(prefix,60,'Menyimpan ke storage...');
+  setBar(prefix,10,'Memproses foto...');
+  let uploadBlob=file, filename=file.name;
+  // Kompres kalau file cukup besar; kalau gagal atau sudah kecil, pakai file asli
+  if(file.size>300*1024){
+    try{
+      const compressed=await compressImage(file);
+      if(compressed&&compressed.size<file.size){
+        uploadBlob=compressed;
+        filename=file.name.replace(/\.[^.]+$/,'')+'.jpg';
+      }
+    }catch(e){/* pakai file asli */}
+  }
+  setBar(prefix,35,'Mengupload foto...');
+  const base64=await fileToBase64(uploadBlob);
+  setBar(prefix,70,'Menyimpan ke storage...');
   const r=await fetch('/api/upload-image',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({token:TOKEN,filename:file.name,filedata:base64,mimetype:file.type})
+    body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype:uploadBlob.type||file.type})
   });
   const d=await r.json();
   setBar(prefix,90,'Hampir selesai...');
@@ -753,8 +846,18 @@ function previewLogo(input){
 async function uploadAndSaveLogo(){
   const file=document.getElementById('logo-file').files[0];
   if(!file){toast('Pilih logo terlebih dahulu!','err');return;}
-  const base64=await toBase64(file);
-  const url=await uploadFile2(file.name,base64,file.type);
+  let uploadBlob=file, filename=file.name;
+  if(file.size>300*1024){
+    try{
+      const compressed=await compressImage(file,800,0.9);
+      if(compressed&&compressed.size<file.size){
+        uploadBlob=compressed;
+        if(compressed.type==='image/jpeg') filename=file.name.replace(/\.[^.]+$/,'')+'.jpg';
+      }
+    }catch(e){/* pakai file asli */}
+  }
+  const base64=await toBase64(uploadBlob);
+  const url=await uploadFile2(filename,base64,uploadBlob.type||file.type);
   if(!url){toast('Gagal upload logo!','err');return;}
   await api('upsert-settings',{key:'site_logo',value:url});
   const img=document.getElementById('sb-logo-img');
@@ -791,7 +894,7 @@ async function renderPesan(){
     const waLink=waNum?`https://wa.me/${waNum.startsWith('0')?'62'+waNum.slice(1):waNum}?text=${encodeURIComponent('Halo '+(p.nama||'')+', terima kasih sudah menghubungi kami mengenai "'+(p.subjek||'pesan Anda')+'".')}`:null;
     const mailLink=`mailto:${p.email}?subject=${encodeURIComponent('Re: '+(p.subjek||'Pesan Anda'))}&body=${encodeURIComponent('Halo '+(p.nama||'')+',\n\nTerima kasih telah menghubungi kami.\n\n')}`;
     return `
-    <div style="background:#fff;border:1px solid ${isBaru?'rgba(244,162,97,0.45)':'var(--border)'};border-radius:12px;padding:16px;box-shadow:${isBaru?'0 4px 16px rgba(244,162,97,0.15)':'0 1px 3px rgba(27,67,50,0.05)'};transition:box-shadow .25s ease;">
+    <div style="background:#fff;border:1px solid ${isBaru?'rgba(244,162,97,0.45)':'var(--border)'};border-radius:12px;padding:16px;box-shadow:${isBaru?'0 4px 16px rgba(244,162,97,0.15)':'0 1px 3px rgba(22,40,63,0.05)'};transition:box-shadow .25s ease;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
         <div>
           <strong style="color:var(--navy);">${p.nama||'-'}</strong>
