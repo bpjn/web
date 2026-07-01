@@ -361,8 +361,8 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
                 </div>
               </div>
             </div>
-            <button class="btn-sm" onclick="uploadAndSaveLogo()">Upload & Simpan Logo</button>
-            <button class="btn-sm" onclick="saveSettings(['site_name','site_tagline'])">Simpan Identitas</button>
+            <button class="btn-sm" id="logo-save-btn" onclick="uploadAndSaveLogo()">Upload & Simpan Logo</button>
+            <button class="btn-sm" id="identitas-save-btn" onclick="saveSettings(['site_name','site_tagline'],'identitas-save-btn')">Simpan Identitas</button>
           </div>
         </div>
 
@@ -406,7 +406,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Visi</label><textarea id="cfg-visi" class="ft2" style="min-height:60px;" placeholder="Visi perusahaan..."></textarea></div>
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Misi</label><textarea id="cfg-misi" class="ft2" style="min-height:60px;" placeholder="Misi perusahaan..."></textarea></div>
             <div class="fg" style="margin-bottom:14px;"><label class="lbl2">Nilai Perusahaan</label><textarea id="cfg-nilai" class="ft2" style="min-height:60px;" placeholder="Nilai-nilai perusahaan..."></textarea></div>
-            <button class="btn-sm" onclick="saveSettings(['about_title','about_desc','about_tahun','visi','misi','nilai'])">Simpan Tentang</button>
+            <button class="btn-sm" id="about-save-btn" onclick="saveSettings(['about_title','about_desc','about_tahun','visi','misi','nilai'],'about-save-btn')">Simpan Tentang</button>
           </div>
         </div>
 
@@ -422,7 +422,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
               <div class="fg"><label class="lbl2">Email</label><input type="text" id="cfg-kontak_email" class="fi2" placeholder="info@perusahaan.co.id"></div>
               <div class="fg"><label class="lbl2">Jam Kerja</label><input type="text" id="cfg-kontak_jam" class="fi2" placeholder="Senin – Jumat, 08.00 – 17.00 WIB"></div>
             </div>
-            <button class="btn-sm" onclick="saveSettings(['kontak_alamat','kontak_telp','kontak_email','kontak_jam'])">Simpan Kontak</button>
+            <button class="btn-sm" id="kontak-save-btn" onclick="saveSettings(['kontak_alamat','kontak_telp','kontak_email','kontak_jam'],'kontak-save-btn')">Simpan Kontak</button>
           </div>
         </div>
 
@@ -440,7 +440,7 @@ a,button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
               <div class="fg"><label class="lbl2">Link LinkedIn</label><input type="text" id="cfg-sosmed_linkedin" class="fi2" placeholder="https://linkedin.com/..."></div>
               <div class="fg"><label class="lbl2">Link YouTube</label><input type="text" id="cfg-sosmed_youtube" class="fi2" placeholder="https://youtube.com/..."></div>
             </div>
-            <button class="btn-sm" onclick="saveSettings(['footer_desc','footer_copy','sosmed_facebook','sosmed_instagram','sosmed_linkedin','sosmed_youtube'])">Simpan Footer & Sosmed</button>
+            <button class="btn-sm" id="footer-save-btn" onclick="saveSettings(['footer_desc','footer_copy','sosmed_facebook','sosmed_instagram','sosmed_linkedin','sosmed_youtube'],'footer-save-btn')">Simpan Footer & Sosmed</button>
           </div>
         </div>
 
@@ -518,13 +518,28 @@ async function loadLoginBranding(){
   }catch(e){/* abaikan, biarkan default tampil */}
 }
 
+// Fetch dengan timeout, supaya kalau server lambat/hang, tombol tidak macet selamanya
+// dan user langsung dapat pesan error yang jelas alih-alih menunggu tanpa kepastian.
+async function fetchTimeout(url,options={},ms=20000){
+  const ctrl=new AbortController();
+  const id=setTimeout(()=>ctrl.abort(),ms);
+  try{
+    return await fetch(url,{...options,signal:ctrl.signal});
+  }catch(e){
+    if(e.name==='AbortError') throw new Error('Server tidak merespon (timeout). Coba lagi.');
+    throw new Error('Tidak dapat terhubung ke server.');
+  }finally{
+    clearTimeout(id);
+  }
+}
+
 // API
 async function api(fn,body){
-  const r=await fetch(`/api/${fn}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,...body})});
+  const r=await fetchTimeout(`/api/${fn}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,...body})});
   return r.json();
 }
 async function getData(table){
-  const r=await fetch(`/api/get-data?table=${table}`);
+  const r=await fetchTimeout(`/api/get-data?table=${table}`);
   return r.json();
 }
 
@@ -593,9 +608,10 @@ async function saveSettings(keys, btnId){
     }));
     toast('Pengaturan berhasil disimpan!');
   }catch(e){
-    toast('Gagal menyimpan pengaturan.','err');
+    toast(e.message||'Gagal menyimpan pengaturan.','err');
+  }finally{
+    if(btnId)setLoading(btnId,false);
   }
-  if(btnId)setLoading(btnId,false);
 }
 
 // Simpan Hero: upload foto (jika ada, dikompres dulu biar cepat) + semua field teks sekaligus
@@ -605,7 +621,7 @@ async function saveHero(){
     let hero_image=null;
     if(document.getElementById('h-file').files[0]){
       hero_image=await uploadFile('h');
-      if(!hero_image){setLoading('h-submit',false);return;}
+      if(!hero_image){return;} // uploadFile sudah kasih toast error
     }
     const keys=['hero_tag','hero_title','hero_desc','stat_klien','stat_proyek','stat_tahun'];
     const tasks=keys.map(key=>{
@@ -615,12 +631,12 @@ async function saveHero(){
     });
     if(hero_image) tasks.push(api('upsert-settings',{key:'hero_image',value:hero_image}));
     await Promise.all(tasks);
-    setBar('h',0,'');
     toast('Hero berhasil disimpan!');
   }catch(e){
-    toast('Gagal menyimpan hero.','err');
+    toast(e.message||'Gagal menyimpan hero.','err');
+  }finally{
+    setBar('h',0,'');setLoading('h-submit',false);
   }
-  setLoading('h-submit',false);
 }
 
 // UPLOAD HELPERS
@@ -673,7 +689,7 @@ async function uploadFile(prefix){
   // Kompres kalau file cukup besar; kalau gagal atau sudah kecil, pakai file asli
   if(file.size>300*1024){
     try{
-      const compressed=await compressImage(file);
+      const compressed=await compressImage(file,1280,0.76);
       if(compressed&&compressed.size<file.size){
         uploadBlob=compressed;
         filename=file.name.replace(/\.[^.]+$/,'')+'.jpg';
@@ -683,14 +699,18 @@ async function uploadFile(prefix){
   setBar(prefix,35,'Mengupload foto...');
   const base64=await fileToBase64(uploadBlob);
   setBar(prefix,70,'Menyimpan ke storage...');
-  const r=await fetch('/api/upload-image',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype:uploadBlob.type||file.type})
-  });
-  const d=await r.json();
-  setBar(prefix,90,'Hampir selesai...');
-  if(!d.url){toast('Upload foto gagal: '+(d.error||'error'),'err');setBar(prefix,0,'');return null;}
-  return d.url;
+  try{
+    const r=await fetchTimeout('/api/upload-image',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype:uploadBlob.type||file.type})
+    },25000);
+    const d=await r.json();
+    setBar(prefix,90,'Hampir selesai...');
+    if(!d.url){toast('Upload foto gagal: '+(d.error||'error'),'err');setBar(prefix,0,'');return null;}
+    return d.url;
+  }catch(e){
+    toast(e.message||'Upload foto gagal.','err');setBar(prefix,0,'');return null;
+  }
 }
 
 function setBar(prefix,pct,txt){
@@ -729,12 +749,20 @@ async function addNews(){
   const body=document.getElementById('n-body').value.trim();
   if(!title||!body){toast('Isi judul dan isi berita!','err');return;}
   setLoading('n-submit',true);
-  let image_url=null;
-  if(document.getElementById('n-file').files[0]) image_url=await uploadFile('n');
-  setBar('n',95,'Menyimpan berita...');
-  await api('save-data',{table:'news',data:{title,cat:document.getElementById('n-cat').value,body,icon:document.getElementById('n-icon').value||'📰',status:document.getElementById('n-status').value,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),image_url}});
-  setBar('n',0,'');setLoading('n-submit',false);
-  resetSection('n');renderNews();loadStats();toast('Berita berhasil ditambahkan!');
+  try{
+    let image_url=null;
+    if(document.getElementById('n-file').files[0]){
+      image_url=await uploadFile('n');
+      if(!image_url){return;} // uploadFile sudah kasih toast error
+    }
+    setBar('n',95,'Menyimpan berita...');
+    await api('save-data',{table:'news',data:{title,cat:document.getElementById('n-cat').value,body,icon:document.getElementById('n-icon').value||'📰',status:document.getElementById('n-status').value,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),image_url}});
+    resetSection('n');renderNews();loadStats();toast('Berita berhasil ditambahkan!');
+  }catch(e){
+    toast(e.message||'Gagal menyimpan berita.','err');
+  }finally{
+    setBar('n',0,'');setLoading('n-submit',false);
+  }
 }
 async function delNews(id){if(!confirm('Hapus berita ini?'))return;await api('delete-data',{table:'news',id});renderNews();loadStats();toast('Berita dihapus.');}
 async function toggleNews(id,cur){await api('update-data',{table:'news',id,data:{status:cur==='published'?'draft':'published'}});renderNews();toast('Status diperbarui.');}
@@ -759,13 +787,18 @@ async function addGallery(){
   if(!title){toast('Isi judul foto!','err');return;}
   if(!document.getElementById('g-file').files[0]){toast('Pilih foto terlebih dahulu!','err');return;}
   setLoading('g-submit',true);
-  const image_url=await uploadFile('g');
-  if(!image_url){setLoading('g-submit',false);return;}
-  setBar('g',95,'Menyimpan...');
-  await api('save-data',{table:'gallery',data:{title,icon:'🖼️',descr:document.getElementById('g-desc').value,image_url}});
-  setBar('g',0,'');setLoading('g-submit',false);
-  resetSection('g');document.getElementById('g-title').value='';document.getElementById('g-desc').value='';
-  renderGal();loadStats();toast('Foto berhasil diupload!');
+  try{
+    const image_url=await uploadFile('g');
+    if(!image_url){return;}
+    setBar('g',95,'Menyimpan...');
+    await api('save-data',{table:'gallery',data:{title,icon:'🖼️',descr:document.getElementById('g-desc').value,image_url}});
+    resetSection('g');document.getElementById('g-title').value='';document.getElementById('g-desc').value='';
+    renderGal();loadStats();toast('Foto berhasil diupload!');
+  }catch(e){
+    toast(e.message||'Gagal menyimpan foto.','err');
+  }finally{
+    setBar('g',0,'');setLoading('g-submit',false);
+  }
 }
 async function delGal(id){if(!confirm('Hapus foto ini?'))return;await api('delete-data',{table:'gallery',id});renderGal();loadStats();toast('Foto dihapus.');}
 async function renderGal(){
@@ -788,13 +821,21 @@ async function addService(){
   const descr=document.getElementById('s-desc').value.trim();
   if(!title||!descr){toast('Isi nama dan deskripsi!','err');return;}
   setLoading('s-submit',true);
-  let image_url=null;
-  if(document.getElementById('s-file').files[0]) image_url=await uploadFile('s');
-  setBar('s',95,'Menyimpan...');
-  await api('save-data',{table:'services',data:{icon:document.getElementById('s-icon').value||'🔧',title,descr,image_url}});
-  setBar('s',0,'');setLoading('s-submit',false);
-  resetSection('s');document.getElementById('s-title').value='';document.getElementById('s-desc').value='';document.getElementById('s-icon').value='🔧';
-  renderSvc();loadStats();toast('Layanan berhasil ditambahkan!');
+  try{
+    let image_url=null;
+    if(document.getElementById('s-file').files[0]){
+      image_url=await uploadFile('s');
+      if(!image_url){return;}
+    }
+    setBar('s',95,'Menyimpan...');
+    await api('save-data',{table:'services',data:{icon:document.getElementById('s-icon').value||'🔧',title,descr,image_url}});
+    resetSection('s');document.getElementById('s-title').value='';document.getElementById('s-desc').value='';document.getElementById('s-icon').value='🔧';
+    renderSvc();loadStats();toast('Layanan berhasil ditambahkan!');
+  }catch(e){
+    toast(e.message||'Gagal menyimpan layanan.','err');
+  }finally{
+    setBar('s',0,'');setLoading('s-submit',false);
+  }
 }
 async function delSvc(id){if(!confirm('Hapus layanan ini?'))return;await api('delete-data',{table:'services',id});renderSvc();loadStats();toast('Layanan dihapus.');}
 async function renderSvc(){
@@ -846,23 +887,30 @@ function previewLogo(input){
 async function uploadAndSaveLogo(){
   const file=document.getElementById('logo-file').files[0];
   if(!file){toast('Pilih logo terlebih dahulu!','err');return;}
-  let uploadBlob=file, filename=file.name;
-  if(file.size>300*1024){
-    try{
-      const compressed=await compressImage(file,800,0.9);
-      if(compressed&&compressed.size<file.size){
-        uploadBlob=compressed;
-        if(compressed.type==='image/jpeg') filename=file.name.replace(/\.[^.]+$/,'')+'.jpg';
-      }
-    }catch(e){/* pakai file asli */}
+  setLoading('logo-save-btn',true);
+  try{
+    let uploadBlob=file, filename=file.name;
+    if(file.size>300*1024){
+      try{
+        const compressed=await compressImage(file,800,0.9);
+        if(compressed&&compressed.size<file.size){
+          uploadBlob=compressed;
+          if(compressed.type==='image/jpeg') filename=file.name.replace(/\.[^.]+$/,'')+'.jpg';
+        }
+      }catch(e){/* pakai file asli */}
+    }
+    const base64=await toBase64(uploadBlob);
+    const url=await uploadFile2(filename,base64,uploadBlob.type||file.type);
+    if(!url){toast('Gagal upload logo!','err');return;}
+    await api('upsert-settings',{key:'site_logo',value:url});
+    const img=document.getElementById('sb-logo-img');
+    if(img){img.src=url;img.style.display='block';}
+    toast('Logo berhasil disimpan!');
+  }catch(e){
+    toast(e.message||'Gagal menyimpan logo.','err');
+  }finally{
+    setLoading('logo-save-btn',false);
   }
-  const base64=await toBase64(uploadBlob);
-  const url=await uploadFile2(filename,base64,uploadBlob.type||file.type);
-  if(!url){toast('Gagal upload logo!','err');return;}
-  await api('upsert-settings',{key:'site_logo',value:url});
-  const img=document.getElementById('sb-logo-img');
-  if(img){img.src=url;img.style.display='block';}
-  toast('Logo berhasil disimpan!');
 }
 
 async function toBase64(file){
@@ -871,7 +919,7 @@ async function toBase64(file){
 
 async function uploadFile2(filename,base64,mimetype){
   try{
-    const r=await fetch('/api/upload-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype})});
+    const r=await fetchTimeout('/api/upload-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,filename,filedata:base64,mimetype})},25000);
     const d=await r.json();
     return d.url||null;
   }catch{return null;}
