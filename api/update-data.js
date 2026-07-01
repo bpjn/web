@@ -1,16 +1,13 @@
-const { supabase, json, err } = require('../lib/supabase');
-
-module.exports = async function handler(req, res) {
+import { supabase, verifyToken, json, err } from '../lib/supabase.js';
+const ALLOWED = ['news', 'gallery', 'services', 'settings', 'pesan'];
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
-
-  const { nama, email, telp, subjek, isi } = req.body ?? {};
-
-  if (!nama || !email || !isi) return err(res, 'Nama, email, dan isi pesan wajib diisi.');
-
+  const { token, table, id, key, data } = req.body ?? {};
+  if (!verifyToken(token)) return err(res, 'Tidak terautentikasi.', 401);
+  if (!table || !ALLOWED.includes(table)) return err(res, 'Table tidak valid.');
+  const filter = table === 'settings' ? `?key=eq.${key}` : `?id=eq.${id}`;
   try {
-    await supabase('POST', 'pesan', '', { nama, email, telp: telp ?? '', subjek: subjek ?? '', isi, status: 'baru', created_at: new Date().toISOString() }, { Prefer: 'return=minimal' });
-    return json(res, { ok: true });
-  } catch (e) {
-    return err(res, e.message, 500);
-  }
-};
+    const result = await supabase('PATCH', table, filter, data, { Prefer: 'return=representation' });
+    return json(res, result);
+  } catch (e) { return err(res, e.message, 500); }
+}
