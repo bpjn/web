@@ -186,25 +186,11 @@ a,button{-webkit-tap-highlight-color:transparent;cursor:pointer;}
       <div class="nav-logo-icon" id="nav-logo-icon"><img id="nav-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
       <div class="nav-logo-text" id="nav-logo-text"><span id="nav-tagline"></span></div>
     </a>
-    <div class="nav-links">
-      <a href="#beranda" class="active">Beranda</a>
-      <a href="#tentang">Tentang</a>
-      <a href="#layanan">Layanan</a>
-      <a href="#berita">Berita</a>
-      <a href="#galeri">Galeri</a>
-      <a href="#kontak">Kontak</a>
-    </div>
+    <div class="nav-links" id="nav-links"></div>
     <button class="nav-hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></button>
   </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu">
-  <a href="#beranda" onclick="closeMobile()">Beranda</a>
-  <a href="#tentang" onclick="closeMobile()">Tentang</a>
-  <a href="#layanan" onclick="closeMobile()">Layanan</a>
-  <a href="#berita" onclick="closeMobile()">Berita</a>
-  <a href="#galeri" onclick="closeMobile()">Galeri</a>
-  <a href="#kontak" onclick="closeMobile()">Kontak</a>
-</div>
+<div class="mobile-menu" id="mobile-menu"></div>
 
 <section class="hero" id="beranda">
   <div class="hero-bg"></div><div class="hero-glow"></div>
@@ -367,6 +353,34 @@ function s(id){return document.getElementById(id);}
 function setText(id,val){const el=s(id);if(el&&val)el.textContent=val;}
 function setHtml(id,val){const el=s(id);if(el&&val)el.innerHTML=val;}
 
+// Menu navigasi: dibaca dari settings key 'nav_menu' (JSON array [{label,href}]).
+// Kalau admin belum pernah menyimpan menu, pakai daftar default ini.
+const DEFAULT_NAV_MENU=[
+  {label:'Beranda',href:'#beranda'},
+  {label:'Tentang',href:'#tentang'},
+  {label:'Layanan',href:'#layanan'},
+  {label:'Berita',href:'#berita'},
+  {label:'Galeri',href:'#galeri'},
+  {label:'Kontak',href:'#kontak'}
+];
+function renderNavMenu(cfg){
+  let menu=DEFAULT_NAV_MENU;
+  if(cfg.nav_menu){
+    try{
+      const parsed=JSON.parse(cfg.nav_menu);
+      if(Array.isArray(parsed)&&parsed.length)menu=parsed;
+    }catch(e){/* JSON tidak valid, pakai default */}
+  }
+  const navLinks=s('nav-links');
+  const mobileMenu=s('mobile-menu');
+  if(navLinks){
+    navLinks.innerHTML=menu.map((m,i)=>`<a href="${m.href}"${i===0?' class="active"':''}>${m.label}</a>`).join('');
+  }
+  if(mobileMenu){
+    mobileMenu.innerHTML=menu.map(m=>`<a href="${m.href}" onclick="closeMobile()">${m.label}</a>`).join('');
+  }
+}
+
 async function renderPublic(){
   // Catat kunjungan
   fetch('/api/track-visitor', { method: 'POST' }).catch(()=>{});
@@ -382,6 +396,9 @@ async function renderPublic(){
 
   document.title = siteName;
   setText('page-title-meta', siteName);
+
+  // Menu navigasi (dinamis dari admin, fallback ke default)
+  renderNavMenu(cfg);
 
   // Navbar
   setText('nav-logo-text', siteName);
